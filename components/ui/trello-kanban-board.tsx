@@ -133,7 +133,7 @@ export function KanbanBoard({
     const getLabelColor = (label: string) => labelColors[label] || "bg-slate-500"
 
     return (
-        <div className={cn("flex gap-4 overflow-x-auto pb-4", className)}>
+        <div className={cn("flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory touch-pan-x", className)}>
             {columns.map((column) => {
                 const isDropActive = dropTarget === column.id && draggedTask?.sourceColumnId !== column.id
 
@@ -144,7 +144,7 @@ export function KanbanBoard({
                         onDrop={() => handleDrop(column.id)}
                         onDragLeave={() => setDropTarget(null)}
                         className={cn(
-                            "min-w-[280px] max-w-[280px] rounded-xl p-3 transition-all duration-200",
+                            "min-w-[280px] max-w-[280px] rounded-xl p-3 transition-all duration-200 snap-center",
                             "bg-slate-800/50 border-2 backdrop-blur-sm",
                             isDropActive ? "border-energisa-orange/50 border-dashed bg-energisa-orange/5" : "border-transparent",
                         )}

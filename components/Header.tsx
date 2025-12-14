@@ -88,8 +88,8 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick }) => {
             Ajuda
           </button>
           <div className="pt-4 border-t border-white/10">
-            <Button fullWidth variant="outline" onClick={() => { setIsMobileMenuOpen(false); onLoginClick(); }} className="justify-center border-white/20 text-white hover:bg-white/10">
-              Já sou cliente
+            <Button fullWidth variant="primary" onClick={() => { setIsMobileMenuOpen(false); onLoginClick(); }} className="justify-center font-bold shadow-lg shadow-orange-500/20">
+              Sou Consultor
             </Button>
           </div>
         </div>
