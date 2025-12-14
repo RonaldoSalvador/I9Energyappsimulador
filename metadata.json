@@ -1,0 +1,5 @@
+{
+  "name": "i9 Energy Simulator",
+  "description": "A conversion-focused web application for i9 Energy (Energisa Partner) to simulate solar subscription savings and capture leads.",
+  "requestFramePermissions": []
+}
