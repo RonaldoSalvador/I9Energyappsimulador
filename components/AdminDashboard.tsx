@@ -13,10 +13,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const [leads, setLeads] = useState<DatabaseLead[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'contacted' | 'contract_signed' | 'lost'>('all');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'contacted' | 'converted' | 'rejected'>('all');
     const [viewMode, setViewMode] = useState<'table' | 'kanban'>('kanban');
     const [activeModule, setActiveModule] = useState<'leads' | 'candidates'>('leads');
     const [candidates, setCandidates] = useState<any[]>([]);
+
+    // Mobile Check
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Pagination State
     const [page, setPage] = useState(0);
@@ -132,8 +141,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         switch (status) {
             case 'new': return 'bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
             case 'contacted': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.3)]';
-            case 'contract_signed': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
-            case 'lost': return 'bg-slate-700/50 text-slate-400 border-slate-700 shadow-none';
+            case 'converted': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+            case 'rejected': return 'bg-slate-700/50 text-slate-400 border-slate-700 shadow-none';
             default: return 'bg-slate-800 text-slate-400';
         }
     };
@@ -204,7 +213,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         { label: 'Total de Leads', value: leads.length, color: 'from-blue-500 to-indigo-600', icon: Search },
                         { label: 'Novas Oportunidades', value: leads.filter(l => l.status === 'new').length, color: 'from-orange-500 to-red-500', icon: Clock },
                         { label: 'Em Negociação', value: leads.filter(l => l.status === 'contacted').length, color: 'from-yellow-400 to-orange-500', icon: Phone },
-                        { label: 'Contratos Fechados', value: leads.filter(l => l.status === 'contract_signed').length, color: 'from-emerald-400 to-green-600', icon: CheckCircle }
+                        { label: 'Contratos Fechados', value: leads.filter(l => l.status === 'converted').length, color: 'from-emerald-400 to-green-600', icon: CheckCircle }
                     ].map((stat, i) => (
                         <div key={i} className="relative group perspective">
                             <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-500`}></div>
@@ -232,8 +241,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 { id: 'all', label: 'Todos' },
                                 { id: 'new', label: 'Novos' },
                                 { id: 'contacted', label: 'Negociação' },
-                                { id: 'contract_signed', label: 'Fechados' },
-                                { id: 'lost', label: 'Perdidos' }
+                                { id: 'converted', label: 'Fechados' },
+                                { id: 'rejected', label: 'Perdidos' }
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -297,17 +306,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         columns={[
                                             { id: 'new', title: 'Novos Leads', tasks: filteredLeads.filter(l => l.status === 'new' || !l.status).map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
                                             { id: 'contacted', title: 'Em Negociação', tasks: filteredLeads.filter(l => l.status === 'contacted').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]], assignee: l.whatsapp ? 'Zap' : undefined })) },
-                                            { id: 'contract_signed', title: 'Fechados', tasks: filteredLeads.filter(l => l.status === 'contract_signed').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
-                                            { id: 'lost', title: 'Perdidos', tasks: filteredLeads.filter(l => l.status === 'lost').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
+                                            { id: 'converted', title: 'Fechados', tasks: filteredLeads.filter(l => l.status === 'converted').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
+                                            { id: 'rejected', title: 'Perdidos', tasks: filteredLeads.filter(l => l.status === 'rejected').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
                                         ]}
                                         columnColors={{
                                             new: 'bg-blue-500/20',
                                             contacted: 'bg-yellow-500/20',
-                                            contract_signed: 'bg-emerald-500/20',
-                                            lost: 'bg-slate-700/50'
+                                            converted: 'bg-emerald-500/20',
+                                            rejected: 'bg-slate-700/50'
                                         }}
                                         onTaskMove={(taskId, from, to) => handleStatusUpdate(taskId, to)}
                                         allowAddTask={false}
+                                        disableDrag={isMobile}
                                         className="h-full"
                                     />
                                 </div>
@@ -415,8 +425,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                                         >
                                                                             <option value="new">Novo Lead</option>
                                                                             <option value="contacted">Negociação</option>
-                                                                            <option value="contract_signed">Vendido</option>
-                                                                            <option value="lost">Perdido</option>
+                                                                            <option value="converted">Vendido</option>
+                                                                            <option value="rejected">Perdido</option>
                                                                         </select>
                                                                     </div>
 

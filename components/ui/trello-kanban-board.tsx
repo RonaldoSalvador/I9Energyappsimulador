@@ -27,6 +27,7 @@ export interface KanbanBoardProps {
     columnColors?: Record<string, string>
     className?: string
     allowAddTask?: boolean
+    disableDrag?: boolean
 }
 
 const defaultLabelColors: Record<string, string> = {
@@ -56,6 +57,7 @@ export function KanbanBoard({
     columnColors = defaultColumnColors,
     className,
     allowAddTask = true,
+    disableDrag = false,
 }: KanbanBoardProps) {
     const [columns, setColumns] = React.useState<KanbanColumn[]>(initialColumns)
     const [draggedTask, setDraggedTask] = React.useState<{
@@ -169,8 +171,8 @@ export function KanbanBoard({
                                 return (
                                     <div
                                         key={task.id}
-                                        draggable
-                                        onDragStart={() => handleDragStart(task, column.id)}
+                                        draggable={!disableDrag}
+                                        onDragStart={() => !disableDrag && handleDragStart(task, column.id)}
                                         onDragEnd={() => setDraggedTask(null)}
                                         className={cn(
                                             "cursor-grab rounded-lg border border-white/5 bg-slate-700/50 p-3 shadow-sm transition-all duration-150",
