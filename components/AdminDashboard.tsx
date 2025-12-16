@@ -18,10 +18,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const [activeModule, setActiveModule] = useState<'leads' | 'candidates'>('leads');
     const [candidates, setCandidates] = useState<any[]>([]);
 
+    // Pagination State
+    const [page, setPage] = useState(0);
+    const ROWS_PER_PAGE = 20;
+    const [totalLeads, setTotalLeads] = useState(0);
+
     useEffect(() => {
         if (activeModule === 'leads') fetchLeads();
         if (activeModule === 'candidates') fetchCandidates();
-    }, [activeModule]);
+    }, [activeModule, page]); // Refetch when page changes
 
     const fetchCandidates = async () => {
         setLoading(true);
@@ -37,14 +42,22 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     };
 
     const fetchLeads = async () => {
+        setLoading(true);
         try {
-            const { data, error } = await supabase
+            const from = page * ROWS_PER_PAGE;
+            const to = from + ROWS_PER_PAGE - 1;
+
+            const { data, error, count } = await supabase
                 .from('leads')
-                .select('*')
-                .order('created_at', { ascending: false });
+                .select('*', { count: 'exact' })
+                .order('created_at', { ascending: false })
+                .range(from, to);
 
             if (error) throw error;
+
             setLeads(data || []);
+            if (count !== null) setTotalLeads(count);
+
         } catch (error) {
             console.error('Error fetching leads:', error);
             alert('Erro ao carregar leads. Verifique se você está logado.');
@@ -277,223 +290,251 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 {/* View Content */}
                 {
                     activeModule === 'leads' ? (
-                        viewMode === 'kanban' ? (
-                            <div className="overflow-x-auto min-h-[600px] animate-in fade-in zoom-in-95 duration-500">
-                                <KanbanBoard
-                                    columns={[
-                                        { id: 'new', title: 'Novos Leads', tasks: filteredLeads.filter(l => l.status === 'new' || !l.status).map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
-                                        { id: 'contacted', title: 'Em Negociação', tasks: filteredLeads.filter(l => l.status === 'contacted').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]], assignee: l.whatsapp ? 'Zap' : undefined })) },
-                                        { id: 'contract_signed', title: 'Fechados', tasks: filteredLeads.filter(l => l.status === 'contract_signed').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
-                                        { id: 'lost', title: 'Perdidos', tasks: filteredLeads.filter(l => l.status === 'lost').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
-                                    ]}
-                                    columnColors={{
-                                        new: 'bg-blue-500/20',
-                                        contacted: 'bg-yellow-500/20',
-                                        contract_signed: 'bg-emerald-500/20',
-                                        lost: 'bg-slate-700/50'
-                                    }}
-                                    onTaskMove={(taskId, from, to) => handleStatusUpdate(taskId, to)}
-                                    allowAddTask={false}
-                                    className="h-full"
-                                />
-                            </div>
-                        ) : (
-                            <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 min-h-[500px]">
-                                {/* Header Gradient Line */}
-                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-energisa-orange via-purple-500 to-emerald-500"></div>
+                        <div className="flex flex-col h-full gap-6">
+                            {viewMode === 'kanban' ? (
+                                <div className="overflow-x-auto min-h-[600px] animate-in fade-in zoom-in-95 duration-500">
+                                    <KanbanBoard
+                                        columns={[
+                                            { id: 'new', title: 'Novos Leads', tasks: filteredLeads.filter(l => l.status === 'new' || !l.status).map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
+                                            { id: 'contacted', title: 'Em Negociação', tasks: filteredLeads.filter(l => l.status === 'contacted').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]], assignee: l.whatsapp ? 'Zap' : undefined })) },
+                                            { id: 'contract_signed', title: 'Fechados', tasks: filteredLeads.filter(l => l.status === 'contract_signed').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
+                                            { id: 'lost', title: 'Perdidos', tasks: filteredLeads.filter(l => l.status === 'lost').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
+                                        ]}
+                                        columnColors={{
+                                            new: 'bg-blue-500/20',
+                                            contacted: 'bg-yellow-500/20',
+                                            contract_signed: 'bg-emerald-500/20',
+                                            lost: 'bg-slate-700/50'
+                                        }}
+                                        onTaskMove={(taskId, from, to) => handleStatusUpdate(taskId, to)}
+                                        allowAddTask={false}
+                                        className="h-full"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 min-h-[500px]">
+                                    {/* Header Gradient Line */}
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-energisa-orange via-purple-500 to-emerald-500"></div>
 
-                                {loading ? (
-                                    <div className="flex flex-col items-center justify-center h-96 space-y-4">
-                                        <div className="w-12 h-12 border-4 border-energisa-orange border-t-transparent rounded-full animate-spin"></div>
-                                        <p className="text-slate-400 animate-pulse">Carregando oportunidades...</p>
-                                    </div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left border-collapse">
-                                            <thead>
-                                                <tr className="border-b border-white/5 text-xs uppercase tracking-widest text-slate-500 font-semibold bg-white/[0.02]">
-                                                    <th className="px-8 py-6">Cliente</th>
-                                                    <th className="px-8 py-6">Contato</th>
-                                                    <th className="px-8 py-6">Potencial</th>
-                                                    <th className="px-8 py-6">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-white/5">
-                                                {filteredLeads.map((lead, index) => (
-                                                    <tr
-                                                        key={lead.id}
-                                                        className="group hover:bg-white/[0.02] transition-colors relative"
-                                                        style={{ animationDelay: `${index * 50}ms` }}
-                                                    >
-                                                        {/* Name & Date */}
-                                                        <td className="px-8 py-5">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-slate-300 font-bold border border-white/5 shadow-inner group-hover:from-energisa-orange group-hover:to-red-500 group-hover:text-white transition-all duration-300">
-                                                                    {lead.name.charAt(0)}
-                                                                </div>
-                                                                <div>
-                                                                    <div className="font-bold text-slate-200 text-base mb-1 group-hover:text-white transition-colors">{lead.name}</div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-white/5">
-                                                                            {lead.distribuidora.split(' ')[0]}
-                                                                        </span>
-                                                                        <span className="text-xs text-slate-500 flex items-center">
-                                                                            <Clock size={10} className="mr-1" />
-                                                                            {new Date(lead.created_at || '').toLocaleDateString('pt-BR')}
-                                                                        </span>
+                                    {loading ? (
+                                        <div className="flex flex-col items-center justify-center h-96 space-y-4">
+                                            <div className="w-12 h-12 border-4 border-energisa-orange border-t-transparent rounded-full animate-spin"></div>
+                                            <p className="text-slate-400 animate-pulse">Carregando oportunidades...</p>
+                                        </div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left border-collapse">
+                                                <thead>
+                                                    <tr className="border-b border-white/5 text-xs uppercase tracking-widest text-slate-500 font-semibold bg-white/[0.02]">
+                                                        <th className="px-8 py-6">Cliente</th>
+                                                        <th className="px-8 py-6">Contato</th>
+                                                        <th className="px-8 py-6">Potencial</th>
+                                                        <th className="px-8 py-6">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-white/5">
+                                                    {filteredLeads.map((lead, index) => (
+                                                        <tr
+                                                            key={lead.id}
+                                                            className="group hover:bg-white/[0.02] transition-colors relative"
+                                                            style={{ animationDelay: `${index * 50}ms` }}
+                                                        >
+                                                            {/* Name & Date */}
+                                                            <td className="px-8 py-5">
+                                                                <div className="flex items-center gap-4">
+                                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-slate-300 font-bold border border-white/5 shadow-inner group-hover:from-energisa-orange group-hover:to-red-500 group-hover:text-white transition-all duration-300">
+                                                                        {lead.name.charAt(0)}
                                                                     </div>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-
-                                                        {/* Contact */}
-                                                        <td className="px-8 py-5">
-                                                            <div className="space-y-1.5">
-                                                                <a href={`https://wa.me/55${lead.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center text-sm text-slate-300 hover:text-green-400 transition-colors w-fit group/link">
-                                                                    <div className="p-1 rounded bg-green-500/10 mr-2 group-hover/link:bg-green-500/20">
-                                                                        <Phone size={12} className="text-green-500" />
-                                                                    </div>
-                                                                    {lead.whatsapp}
-                                                                </a>
-                                                                {lead.email && (
-                                                                    <div className="flex items-center text-sm text-slate-500">
-                                                                        <div className="p-1 rounded bg-blue-500/10 mr-2">
-                                                                            <Mail size={12} className="text-blue-500" />
+                                                                    <div>
+                                                                        <div className="font-bold text-slate-200 text-base mb-1 group-hover:text-white transition-colors">{lead.name}</div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500 bg-slate-800 px-2 py-0.5 rounded border border-white/5">
+                                                                                {lead.distribuidora.split(' ')[0]}
+                                                                            </span>
+                                                                            <span className="text-xs text-slate-500 flex items-center">
+                                                                                <Clock size={10} className="mr-1" />
+                                                                                {new Date(lead.created_at || '').toLocaleDateString('pt-BR')}
+                                                                            </span>
                                                                         </div>
-                                                                        {lead.email}
                                                                     </div>
-                                                                )}
-                                                            </div>
-                                                        </td>
+                                                                </div>
+                                                            </td>
 
-                                                        {/* Bill Info */}
-                                                        <td className="px-8 py-5">
-                                                            <div className="flex flex-col items-start gap-1">
-                                                                <span className="font-mono font-bold text-white text-lg tracking-tight">
-                                                                    R$ {lead.bill_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                                </span>
-
-                                                                {lead.bill_url ? (
-                                                                    <a
-                                                                        href={lead.bill_url}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="text-xs font-semibold text-energisa-orange hover:text-orange-300 flex items-center transition-colors px-2 py-1 -ml-2 rounded hover:bg-orange-500/10"
-                                                                    >
-                                                                        <Download size={12} className="mr-1.5" />
-                                                                        Ver Fatura
+                                                            {/* Contact */}
+                                                            <td className="px-8 py-5">
+                                                                <div className="space-y-1.5">
+                                                                    <a href={`https://wa.me/55${lead.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center text-sm text-slate-300 hover:text-green-400 transition-colors w-fit group/link">
+                                                                        <div className="p-1 rounded bg-green-500/10 mr-2 group-hover/link:bg-green-500/20">
+                                                                            <Phone size={12} className="text-green-500" />
+                                                                        </div>
+                                                                        {lead.whatsapp}
                                                                     </a>
-                                                                ) : (
-                                                                    <span className="text-slate-600 text-xs italic">Sem anexo</span>
-                                                                )}
-                                                            </div>
-                                                        </td>
+                                                                    {lead.email && (
+                                                                        <div className="flex items-center text-sm text-slate-500">
+                                                                            <div className="p-1 rounded bg-blue-500/10 mr-2">
+                                                                                <Mail size={12} className="text-blue-500" />
+                                                                            </div>
+                                                                            {lead.email}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </td>
 
-                                                        {/* Status & Actions */}
-                                                        <td className="px-8 py-5">
-                                                            <div className="flex items-center justify-between gap-4">
-                                                                <div className="relative group/select">
-                                                                    <div className={`absolute inset-0 rounded-full blur opacity-20 group-hover/select:opacity-40 transition-opacity ${getStatusColor(lead.status || 'new').split(' ')[0].replace('/10', '/50')}`}></div>
-                                                                    <select
-                                                                        value={lead.status}
-                                                                        onChange={(e) => handleStatusUpdate(lead.id!, e.target.value)}
-                                                                        className={`relative z-10 text-[10px] font-bold uppercase py-1.5 px-4 rounded-full border bg-slate-900 cursor-pointer outline-none focus:ring-2 focus:ring-white/20 transition-all ${getStatusColor(lead.status || 'new')}`}
+                                                            {/* Bill Info */}
+                                                            <td className="px-8 py-5">
+                                                                <div className="flex flex-col items-start gap-1">
+                                                                    <span className="font-mono font-bold text-white text-lg tracking-tight">
+                                                                        R$ {lead.bill_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                    </span>
+
+                                                                    {lead.bill_url ? (
+                                                                        <a
+                                                                            href={lead.bill_url}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="text-xs font-semibold text-energisa-orange hover:text-orange-300 flex items-center transition-colors px-2 py-1 -ml-2 rounded hover:bg-orange-500/10"
+                                                                        >
+                                                                            <Download size={12} className="mr-1.5" />
+                                                                            Ver Fatura
+                                                                        </a>
+                                                                    ) : (
+                                                                        <span className="text-slate-600 text-xs italic">Sem anexo</span>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+
+                                                            {/* Status & Actions */}
+                                                            <td className="px-8 py-5">
+                                                                <div className="flex items-center justify-between gap-4">
+                                                                    <div className="relative group/select">
+                                                                        <div className={`absolute inset-0 rounded-full blur opacity-20 group-hover/select:opacity-40 transition-opacity ${getStatusColor(lead.status || 'new').split(' ')[0].replace('/10', '/50')}`}></div>
+                                                                        <select
+                                                                            value={lead.status}
+                                                                            onChange={(e) => handleStatusUpdate(lead.id!, e.target.value)}
+                                                                            className={`relative z-10 text-[10px] font-bold uppercase py-1.5 px-4 rounded-full border bg-slate-900 cursor-pointer outline-none focus:ring-2 focus:ring-white/20 transition-all ${getStatusColor(lead.status || 'new')}`}
+                                                                        >
+                                                                            <option value="new">Novo Lead</option>
+                                                                            <option value="contacted">Negociação</option>
+                                                                            <option value="contract_signed">Vendido</option>
+                                                                            <option value="lost">Perdido</option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <button
+                                                                        onClick={() => handleDelete(lead.id!)}
+                                                                        className="text-slate-600 hover:text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-all transform hover:scale-110 opacity-0 group-hover:opacity-100"
+                                                                        title="Excluir"
                                                                     >
-                                                                        <option value="new">Novo Lead</option>
-                                                                        <option value="contacted">Negociação</option>
-                                                                        <option value="contract_signed">Vendido</option>
-                                                                        <option value="lost">Perdido</option>
-                                                                    </select>
+                                                                        <Trash2 size={16} />
+                                                                    </button>
                                                                 </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
 
-                                                                <button
-                                                                    onClick={() => handleDelete(lead.id!)}
-                                                                    className="text-slate-600 hover:text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-all transform hover:scale-110 opacity-0 group-hover:opacity-100"
-                                                                    title="Excluir"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-
-                                                {filteredLeads.length === 0 && (
-                                                    <tr>
-                                                        <td colSpan={4} className="py-24 text-center">
-                                                            <div className="flex flex-col items-center justify-center opacity-50">
-                                                                <div className="bg-slate-800 p-4 rounded-full mb-4">
-                                                                    <Search size={32} className="text-slate-400" />
+                                                    {filteredLeads.length === 0 && (
+                                                        <tr>
+                                                            <td colSpan={4} className="py-24 text-center">
+                                                                <div className="flex flex-col items-center justify-center opacity-50">
+                                                                    <div className="bg-slate-800 p-4 rounded-full mb-4">
+                                                                        <Search size={32} className="text-slate-400" />
+                                                                    </div>
+                                                                    <p className="text-slate-300 text-lg font-medium">Nenhum resultado encontrado</p>
+                                                                    <p className="text-slate-500 text-sm">Tente ajustar seus filtros de busca</p>
                                                                 </div>
-                                                                <p className="text-slate-300 text-lg font-medium">Nenhum resultado encontrado</p>
-                                                                <p className="text-slate-500 text-sm">Tente ajustar seus filtros de busca</p>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )
-                    ) : (
-                        // CANDIDATES VIEW
-                        <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                            <div className="p-6">
-                                <h2 className="text-xl font-bold text-white mb-4">Candidatos a Consultor</h2>
-                                {loading ? (
-                                    <div className="text-center py-12 text-slate-400">Carregando candidatos...</div>
-                                ) : candidates.length === 0 ? (
-                                    <div className="text-center py-12 text-slate-500">Nenhum candidato encontrado.</div>
-                                ) : (
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left">
-                                            <thead>
-                                                <tr className="border-b border-white/5 text-xs uppercase tracking-widest text-slate-500 font-semibold">
-                                                    <th className="px-6 py-4">Data</th>
-                                                    <th className="px-6 py-4">Nome</th>
-                                                    <th className="px-6 py-4">Contato</th>
-                                                    <th className="px-6 py-4">Experiência</th>
-                                                    <th className="px-6 py-4">Status</th>
-                                                    <th className="px-6 py-4">Currículo</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-white/5">
-                                                {candidates.map((candidate) => (
-                                                    <tr key={candidate.id} className="hover:bg-white/[0.02] transition-colors">
-                                                        <td className="px-6 py-4 text-sm text-slate-400">{new Date(candidate.created_at).toLocaleDateString()}</td>
-                                                        <td className="px-6 py-4 font-medium text-white">{candidate.name}</td>
-                                                        <td className="px-6 py-4">
-                                                            <div className="text-sm text-slate-300">{candidate.email}</div>
-                                                            <div className="text-xs text-slate-500">{candidate.whatsapp}</div>
-                                                        </td>
-                                                        <td className="px-6 py-4 text-sm text-slate-400 max-w-xs truncate" title={candidate.message}>
-                                                            {candidate.message || '-'}
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            <span className="px-2 py-1 rounded text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">No Aguardo</span>
-                                                        </td>
-                                                        <td className="px-6 py-4">
-                                                            {candidate.resume_url ? (
-                                                                <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer" className="text-energisa-orange hover:underline text-sm flex items-center gap-1">
-                                                                    <Download size={14} /> Baixar
-                                                                </a>
-                                                            ) : (
-                                                                <span className="text-slate-600 text-xs">Sem anexo</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )
-                }
+                    )}
+
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between px-2 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-slate-900/50 p-4 rounded-xl border border-white/5">
+                    <span className="text-sm text-slate-400 font-medium">
+                        Mostrando <span className="text-white">{Math.min(leads.length, 1) > 0 ? page * ROWS_PER_PAGE + 1 : 0}</span> até <span className="text-white">{Math.min((page + 1) * ROWS_PER_PAGE, totalLeads)}</span> de <span className="text-white">{totalLeads}</span> resultados
+                    </span>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(p => Math.max(0, p - 1))}
+                            disabled={page === 0}
+                            className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Anterior
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setPage(p => p + 1)}
+                            disabled={(page + 1) * ROWS_PER_PAGE >= totalLeads}
+                            className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Próxima
+                        </Button>
+                    </div>
+                </div>
+        </div>
+    ) : (
+        // CANDIDATES VIEW
+        <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+            <div className="p-6">
+                <h2 className="text-xl font-bold text-white mb-4">Candidatos a Consultor</h2>
+                {loading ? (
+                    <div className="text-center py-12 text-slate-400">Carregando candidatos...</div>
+                ) : candidates.length === 0 ? (
+                    <div className="text-center py-12 text-slate-500">Nenhum candidato encontrado.</div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b border-white/5 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                                    <th className="px-6 py-4">Data</th>
+                                    <th className="px-6 py-4">Nome</th>
+                                    <th className="px-6 py-4">Contato</th>
+                                    <th className="px-6 py-4">Experiência</th>
+                                    <th className="px-6 py-4">Status</th>
+                                    <th className="px-6 py-4">Currículo</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {candidates.map((candidate) => (
+                                    <tr key={candidate.id} className="hover:bg-white/[0.02] transition-colors">
+                                        <td className="px-6 py-4 text-sm text-slate-400">{new Date(candidate.created_at).toLocaleDateString()}</td>
+                                        <td className="px-6 py-4 font-medium text-white">{candidate.name}</td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm text-slate-300">{candidate.email}</div>
+                                            <div className="text-xs text-slate-500">{candidate.whatsapp}</div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-slate-400 max-w-xs truncate" title={candidate.message}>
+                                            {candidate.message || '-'}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2 py-1 rounded text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">No Aguardo</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {candidate.resume_url ? (
+                                                <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer" className="text-energisa-orange hover:underline text-sm flex items-center gap-1">
+                                                    <Download size={14} /> Baixar
+                                                </a>
+                                            ) : (
+                                                <span className="text-slate-600 text-xs">Sem anexo</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
             </main >
         </div >
     );

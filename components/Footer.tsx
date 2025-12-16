@@ -7,7 +7,7 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
-  const LOGO_URL = "https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/LOGO%20I9%20ENERGI%20(1).png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL0xPR08gSTkgRU5FUkdJICgxKS5wbmciLCJpYXQiOjE3NjU2OTI0NDUsImV4cCI6MTc5NzIyODQ0NX0.26LLt5xT84b3v_dbo9CoZ0UdEjKICVoOVz07OJJC0nQ";
+  const LOGO_URL = "https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logofinal%20i9%20energy%20(1)semfundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ29maW5hbCBpOSBlbmVyZ3kgKDEpc2VtZnVuZG8ucG5nIiwiaWF0IjoxNzY1NzQwMjc2LCJleHAiOjE3OTcyNzYyNzZ9.ZyqR9bI3C33z6Zpx_Y3NEcklQd8Hi2Q2F7WdYtdK3so";
 
   return (
     <footer className="bg-slate-900 text-slate-300 py-16">
@@ -80,7 +80,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
         </div>
 
         <div className="border-t border-slate-800 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} i9 Energy Soluções S.A. CNPJ 00.000.000/0001-00.</p>
+          <p>© {new Date().getFullYear()} i9 Energy Soluções S.A.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <span className="flex items-center"><div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div> Sistema Operacional</span>
           </div>

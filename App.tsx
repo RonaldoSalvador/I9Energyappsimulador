@@ -135,8 +135,17 @@ function App() {
                   // Check if user is admin (simple check effectively for now, better checks later)
                   // For MVP: if Supabase user exists (user object present), treat as Admin or check email
                   if (user && user.email) {
-                     console.log("Logged in as:", user.email);
-                     setIsAdmin(true); // Assuming any real logged in user is part of the "team" for now
+                     // SECURITY FIX: Only allow specific emails to be Admins
+                     // TODO: Add your actual admin emails here
+                     const ADMIN_EMAILS = ['admin@i9energy.com', 'ronaldin@gmail.com', 'admin@admin.com'];
+
+                     if (ADMIN_EMAILS.includes(user.email) || user.email.includes('@i9energy.com')) {
+                        console.log("Admin Access Granted for:", user.email);
+                        setIsAdmin(true);
+                     } else {
+                        console.warn("User logged in but is NOT an admin:", user.email);
+                        setIsAdmin(false);
+                     }
                   }
                }}
             />
