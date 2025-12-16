@@ -31,7 +31,7 @@ export interface DatabaseLead {
   phase: string;
   distribuidora: string;
   bill_url: string | null;
-  status: 'new' | 'contacted' | 'converted' | 'rejected';
+  status: 'new' | 'contacted' | 'contract_signed' | 'lost';
 }
 
 export interface SimulationParams {
