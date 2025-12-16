@@ -450,91 +450,90 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         </div>
                                     )}
                                 </div>
-                            </div>
-                    )}
+                            )}
 
-                {/* Pagination Controls */}
-                <div className="flex items-center justify-between px-2 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-slate-900/50 p-4 rounded-xl border border-white/5">
-                    <span className="text-sm text-slate-400 font-medium">
-                        Mostrando <span className="text-white">{Math.min(leads.length, 1) > 0 ? page * ROWS_PER_PAGE + 1 : 0}</span> até <span className="text-white">{Math.min((page + 1) * ROWS_PER_PAGE, totalLeads)}</span> de <span className="text-white">{totalLeads}</span> resultados
-                    </span>
-                    <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => setPage(p => Math.max(0, p - 1))}
-                            disabled={page === 0}
-                            className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Anterior
-                        </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => setPage(p => p + 1)}
-                            disabled={(page + 1) * ROWS_PER_PAGE >= totalLeads}
-                            className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            Próxima
-                        </Button>
-                    </div>
-                </div>
-        </div>
-    ) : (
-        // CANDIDATES VIEW
-        <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-            <div className="p-6">
-                <h2 className="text-xl font-bold text-white mb-4">Candidatos a Consultor</h2>
-                {loading ? (
-                    <div className="text-center py-12 text-slate-400">Carregando candidatos...</div>
-                ) : candidates.length === 0 ? (
-                    <div className="text-center py-12 text-slate-500">Nenhum candidato encontrado.</div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b border-white/5 text-xs uppercase tracking-widest text-slate-500 font-semibold">
-                                    <th className="px-6 py-4">Data</th>
-                                    <th className="px-6 py-4">Nome</th>
-                                    <th className="px-6 py-4">Contato</th>
-                                    <th className="px-6 py-4">Experiência</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4">Currículo</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {candidates.map((candidate) => (
-                                    <tr key={candidate.id} className="hover:bg-white/[0.02] transition-colors">
-                                        <td className="px-6 py-4 text-sm text-slate-400">{new Date(candidate.created_at).toLocaleDateString()}</td>
-                                        <td className="px-6 py-4 font-medium text-white">{candidate.name}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="text-sm text-slate-300">{candidate.email}</div>
-                                            <div className="text-xs text-slate-500">{candidate.whatsapp}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-slate-400 max-w-xs truncate" title={candidate.message}>
-                                            {candidate.message || '-'}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="px-2 py-1 rounded text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">No Aguardo</span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {candidate.resume_url ? (
-                                                <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer" className="text-energisa-orange hover:underline text-sm flex items-center gap-1">
-                                                    <Download size={14} /> Baixar
-                                                </a>
-                                            ) : (
-                                                <span className="text-slate-600 text-xs">Sem anexo</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
-        </div>
-    )
-}
+                            {/* Pagination Controls */}
+                            <div className="flex items-center justify-between px-2 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-slate-900/50 p-4 rounded-xl border border-white/5">
+                                <span className="text-sm text-slate-400 font-medium">
+                                    Mostrando <span className="text-white">{Math.min(leads.length, 1) > 0 ? page * ROWS_PER_PAGE + 1 : 0}</span> até <span className="text-white">{Math.min((page + 1) * ROWS_PER_PAGE, totalLeads)}</span> de <span className="text-white">{totalLeads}</span> resultados
+                                </span>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setPage(p => Math.max(0, p - 1))}
+                                        disabled={page === 0}
+                                        className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Anterior
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setPage(p => p + 1)}
+                                        disabled={(page + 1) * ROWS_PER_PAGE >= totalLeads}
+                                        className="border-white/10 text-slate-300 hover:text-white hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Próxima
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        // CANDIDATES VIEW
+                        <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                            <div className="p-6">
+                                <h2 className="text-xl font-bold text-white mb-4">Candidatos a Consultor</h2>
+                                {loading ? (
+                                    <div className="text-center py-12 text-slate-400">Carregando candidatos...</div>
+                                ) : candidates.length === 0 ? (
+                                    <div className="text-center py-12 text-slate-500">Nenhum candidato encontrado.</div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <thead>
+                                                <tr className="border-b border-white/5 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                                                    <th className="px-6 py-4">Data</th>
+                                                    <th className="px-6 py-4">Nome</th>
+                                                    <th className="px-6 py-4">Contato</th>
+                                                    <th className="px-6 py-4">Experiência</th>
+                                                    <th className="px-6 py-4">Status</th>
+                                                    <th className="px-6 py-4">Currículo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {candidates.map((candidate) => (
+                                                    <tr key={candidate.id} className="hover:bg-white/[0.02] transition-colors">
+                                                        <td className="px-6 py-4 text-sm text-slate-400">{new Date(candidate.created_at).toLocaleDateString()}</td>
+                                                        <td className="px-6 py-4 font-medium text-white">{candidate.name}</td>
+                                                        <td className="px-6 py-4">
+                                                            <div className="text-sm text-slate-300">{candidate.email}</div>
+                                                            <div className="text-xs text-slate-500">{candidate.whatsapp}</div>
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-slate-400 max-w-xs truncate" title={candidate.message}>
+                                                            {candidate.message || '-'}
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            <span className="px-2 py-1 rounded text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase">No Aguardo</span>
+                                                        </td>
+                                                        <td className="px-6 py-4">
+                                                            {candidate.resume_url ? (
+                                                                <a href={candidate.resume_url} target="_blank" rel="noopener noreferrer" className="text-energisa-orange hover:underline text-sm flex items-center gap-1">
+                                                                    <Download size={14} /> Baixar
+                                                                </a>
+                                                            ) : (
+                                                                <span className="text-slate-600 text-xs">Sem anexo</span>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )
+                }
             </main >
         </div >
     );
