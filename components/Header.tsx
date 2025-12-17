@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick }) => {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <img
-            src="/i9-logo.png"
+            src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/Gemini_Generated_Image_iogyo7iogyo7iogynova%20logo%20i9enrgy%20oficial%20(1)sem%20fundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL0dlbWluaV9HZW5lcmF0ZWRfSW1hZ2VfaW9neW83aW9neW83aW9neW5vdmEgbG9nbyBpOWVucmd5IG9maWNpYWwgKDEpc2VtIGZ1bmRvLnBuZyIsImlhdCI6MTc2NTk4NTI1NiwiZXhwIjoyMDgxMzQ1MjU2fQ.CNhqEuKjCQCGZQE4ZpBos1VtRHZCYlcDZnZmzUe5bcg"
             alt="i9 Energy Logo"
             className="h-24 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
           />

@@ -163,7 +163,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             <div className="absolute inset-0 bg-energisa-orange blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 p-1 rounded-xl shadow-xl transform group-hover:scale-105 transition-transform duration-300 border border-white/10">
                                 <img
-                                    src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logofinal%20i9%20energy%20(1)semfundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ29maW5hbCBpOSBlbmVyZ3kgKDEpc2VtZnVuZG8ucG5nIiwiaWF0IjoxNzY1NzQwMjc2LCJleHAiOjE3OTcyNzYyNzZ9.ZyqR9bI3C33z6Zpx_Y3NEcklQd8Hi2Q2F7WdYtdK3so"
+                                    src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/Gemini_Generated_Image_iogyo7iogyo7iogynova%20logo%20i9enrgy%20oficial%20(1)sem%20fundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL0dlbWluaV9HZW5lcmF0ZWRfSW1hZ2VfaW9neW83aW9neW83aW9neW5vdmEgbG9nbyBpOWVucmd5IG9maWNpYWwgKDEpc2VtIGZ1bmRvLnBuZyIsImlhdCI6MTc2NTk4NTI1NiwiZXhwIjoyMDgxMzQ1MjU2fQ.CNhqEuKjCQCGZQE4ZpBos1VtRHZCYlcDZnZmzUe5bcg"
                                     alt="Logo"
                                     className="w-10 h-10 object-contain"
                                 />
