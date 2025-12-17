@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from './ui/Button';
+import logo from '../assets/i9-logo.png';
 
 interface HeaderProps {
   onNavigate: (sectionId: string) => void;
@@ -9,7 +10,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const LOGO_URL = "https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logofinal%20i9%20energy%20(1)semfundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ29maW5hbCBpOSBlbmVyZ3kgKDEpc2VtZnVuZG8ucG5nIiwiaWF0IjoxNzY1NzQwMjc2LCJleHAiOjE3OTcyNzYyNzZ9.ZyqR9bI3C33z6Zpx_Y3NEcklQd8Hi2Q2F7WdYtdK3so";
+  import logo from '../assets/i9-logo.png';
 
   const handleNavClick = (sectionId: string) => {
     onNavigate(sectionId);
@@ -25,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick }) => {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <img
-            src={LOGO_URL}
+            src={logo}
             alt="i9 Energy Logo"
             className="h-24 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
           />

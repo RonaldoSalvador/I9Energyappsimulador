@@ -1,13 +1,14 @@
 import React from 'react';
 import { Instagram, Facebook, Linkedin } from 'lucide-react';
 import { LegalContentType } from './LegalModal';
+import logo from '../assets/i9-logo.png';
 
 interface FooterProps {
   onOpenLegal: (type: LegalContentType) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
-  const LOGO_URL = "https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logofinal%20i9%20energy%20(1)semfundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ29maW5hbCBpOSBlbmVyZ3kgKDEpc2VtZnVuZG8ucG5nIiwiaWF0IjoxNzY1NzQwMjc2LCJleHAiOjE3OTcyNzYyNzZ9.ZyqR9bI3C33z6Zpx_Y3NEcklQd8Hi2Q2F7WdYtdK3so";
+  import logo from '../assets/i9-logo.png';
 
   return (
     <footer className="bg-slate-900 text-slate-300 py-16">
@@ -19,7 +20,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
             <div className="flex items-center space-x-2 mb-6">
               <div className="bg-white rounded-xl p-4 inline-block">
                 <img
-                  src={LOGO_URL}
+                  src={logo}
                   alt="i9 Energy Logo"
                   className="h-20 w-auto object-contain"
                 />
