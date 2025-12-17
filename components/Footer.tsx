@@ -8,7 +8,6 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
-  import logo from '../assets/i9-logo.png';
 
   return (
     <footer className="bg-slate-900 text-slate-300 py-16">

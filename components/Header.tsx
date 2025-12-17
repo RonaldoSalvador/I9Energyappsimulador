@@ -10,7 +10,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  import logo from '../assets/i9-logo.png';
 
   const handleNavClick = (sectionId: string) => {
     onNavigate(sectionId);
