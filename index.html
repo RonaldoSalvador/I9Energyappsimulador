@@ -1,90 +1,98 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>i9 Energy | Energia Inteligente</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>i9 Energy | Energia Inteligente</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="icon" type="image/png" href="/i9-logo.png" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            energisa: {
+              orange: '#FF6B00',
+              light: '#FF8533',
+              dark: '#CC5500',
             },
-            colors: {
-              energisa: {
-                orange: '#FF6B00',
-                light: '#FF8533',
-                dark: '#CC5500',
-              },
-              i9: {
-                green: '#10B981',
-                dark: '#059669',
-                light: '#34D399',
-              }
-            },
-            animation: {
-              'float': 'float 6s ease-in-out infinite',
-            },
-            keyframes: {
-              float: {
-                '0%, 100%': { transform: 'translateY(0)' },
-                '50%': { transform: 'translateY(-10px)' },
-              }
+            i9: {
+              green: '#10B981',
+              dark: '#059669',
+              light: '#34D399',
+            }
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
             }
           }
         }
       }
-    </script>
-    <style>
-      body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        background-color: #FAFAFA;
-      }
-      
-      /* Modern Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-color: #FAFAFA;
+    }
 
-      /* Custom Slider Styling */
-      input[type=range]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        height: 28px;
-        width: 28px;
-        border-radius: 50%;
-        background: #FF6B00;
-        cursor: pointer;
-        margin-top: -12px;
-        box-shadow: 0 4px 10px rgba(255, 107, 0, 0.4);
-        border: 2px solid white;
-        transition: transform 0.1s;
-      }
-      input[type=range]::-webkit-slider-thumb:hover {
-        transform: scale(1.1);
-      }
-      input[type=range]::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 6px;
-        cursor: pointer;
-        background: #E2E8F0;
-        border-radius: 999px;
-      }
-    </style>
+    /* Modern Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Custom Slider Styling */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 28px;
+      width: 28px;
+      border-radius: 50%;
+      background: #FF6B00;
+      cursor: pointer;
+      margin-top: -12px;
+      box-shadow: 0 4px 10px rgba(255, 107, 0, 0.4);
+      border: 2px solid white;
+      transition: transform 0.1s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      background: #E2E8F0;
+      border-radius: 999px;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -97,8 +105,10 @@
 }
 </script>
 </head>
-  <body class="bg-[#FAFAFA] text-slate-900 antialiased selection:bg-orange-100 selection:text-orange-900">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body class="bg-[#FAFAFA] text-slate-900 antialiased selection:bg-orange-100 selection:text-orange-900">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>

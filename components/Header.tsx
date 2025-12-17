@@ -1,7 +1,6 @@
 import React from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from './ui/Button';
-import logo from '../assets/i9-logo.png';
 
 interface HeaderProps {
   onNavigate: (sectionId: string) => void;
@@ -25,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick }) => {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <img
-            src={logo}
+            src="/i9-logo.png"
             alt="i9 Energy Logo"
             className="h-24 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
           />

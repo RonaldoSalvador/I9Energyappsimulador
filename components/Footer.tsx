@@ -1,7 +1,6 @@
 import React from 'react';
 import { Instagram, Facebook, Linkedin } from 'lucide-react';
 import { LegalContentType } from './LegalModal';
-import logo from '../assets/i9-logo.png';
 
 interface FooterProps {
   onOpenLegal: (type: LegalContentType) => void;
@@ -19,7 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
             <div className="flex items-center space-x-2 mb-6">
               <div className="bg-white rounded-xl p-4 inline-block">
                 <img
-                  src={logo}
+                  src="/i9-logo.png"
                   alt="i9 Energy Logo"
                   className="h-20 w-auto object-contain"
                 />
