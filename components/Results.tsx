@@ -126,31 +126,15 @@ const I9Side = ({ result }: { result: SimulationResult }) => {
 
 export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) => {
   // Fire confetti on mount
+  // Fire confetti on mount - Optimized for mobile (One burst instead of loop)
   useEffect(() => {
-    const duration = 3000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 2,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#10b981', '#34d399', '#fbbf24']
-      });
-      confetti({
-        particleCount: 2,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#10b981', '#34d399', '#fbbf24']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#10b981', '#34d399', '#fbbf24'],
+      disableForReducedMotion: true
+    });
   }, []);
 
 
