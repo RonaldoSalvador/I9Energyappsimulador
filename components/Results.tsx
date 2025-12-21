@@ -210,16 +210,7 @@ export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) 
                     <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
                     <stop offset="100%" stopColor="#059669" stopOpacity={0.8} />
                   </linearGradient>
-                  <filter id="glow" height="130%">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
-                    <feOffset dx="0" dy="0" result="offsetblur" />
-                    <feFlood floodColor="#10b981" floodOpacity="0.5" />
-                    <feComposite in2="offsetblur" operator="in" />
-                    <feMerge>
-                      <feMergeNode />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
+
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.4} />
                 <XAxis
@@ -260,7 +251,6 @@ export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) 
                     <Cell
                       key={`cell-${index}`}
                       fill={index === 1 ? "url(#barGradientI9)" : "url(#barGradientActual)"}
-                      filter={index === 1 ? "url(#glow)" : ""}
                     />
                   ))}
                 </Bar>
