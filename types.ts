@@ -19,6 +19,7 @@ export interface LeadData {
   acceptedTerms: boolean;
   billFile?: File | null;
   billUrl?: string; // URL after upload
+  referralId?: string | null;
 }
 
 export interface DatabaseLead {
@@ -31,6 +32,7 @@ export interface DatabaseLead {
   phase: string;
   distribuidora: string;
   bill_url: string | null;
+  referral_id: string | null;
   status: 'new' | 'contacted' | 'contract_signed' | 'lost';
 }
 

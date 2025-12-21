@@ -54,7 +54,12 @@ export const calculateSavings = (params: SimulationParams): SimulationResult => 
   // i9 Price Calculation:
   // The "value" delivered is the energy credit.
   // i9 charges for that credit with a discount applied to the *net benefit*.
-  const subscriptionCost = (grossCompensableValue - fioBTax) * (1 - CONSTANTS.DESCONTO_OFERECIDO);
+
+  // Christmas Logic: 60% in December, 30% in other months
+  const currentMonth = new Date().getMonth(); // 0-11, 11 is December
+  const activeDiscount = currentMonth === 11 ? 0.60 : 0.30;
+
+  const subscriptionCost = (grossCompensableValue - fioBTax) * (1 - activeDiscount);
 
   // 7. Calculate Residual Bill (Energisa)
   const costOfAvailability = minConsumptionKwh * CONSTANTS.TARIFA_MEDIA;

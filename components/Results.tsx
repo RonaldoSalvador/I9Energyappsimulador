@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
+
 import { SimulationResult } from '../types';
 import { Zap, Wallet, TrendingDown, ArrowRight, Trophy, Download, ShieldCheck, Sparkles } from 'lucide-react';
 import { LightningSplit } from './ui/lightning-split';
 import { Button } from './ui/Button';
+import confetti from 'canvas-confetti';
+import CountUp from 'react-countup';
+
 
 interface ResultsProps {
   result: SimulationResult;
@@ -13,56 +17,143 @@ interface ResultsProps {
 
 const CompetitorSide = ({ result }: { result: SimulationResult }) => {
   const isCompetitor = result.hasCompetitor;
-  const title = isCompetitor ? "Concorrência" : "Fatura Atual";
+  const title = isCompetitor ? "Sua Situação Atual" : "Fatura Atual";
   const value = isCompetitor ? result.competitorTotalValue : result.originalBillValue;
-  const subtitle = isCompetitor ? 'O que você pagaria com seu "desconto" atual' : 'O que você paga hoje sem a i9';
-  const tagText = isCompetitor ? "Desconto fraco" : "Preço Cheio";
+  const subtitle = isCompetitor ? 'Valor aproximado com seu desconto atual' : 'Sem o plano i9 Energy';
+  const tagText = isCompetitor ? "Desconto Baixo" : "Preço Cheio";
 
   return (
-    <div className="h-full w-full bg-slate-900 flex flex-col items-center justify-center p-8 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900"></div>
-      <div className="relative z-10 text-center">
-        <h3 className="text-xl font-bold text-slate-400 uppercase tracking-widest mb-4">{title}</h3>
-        <div className="text-5xl font-mono text-slate-500 line-through decoration-red-500/50 mb-2 font-bold decoration-4">
-          R$ {value?.toFixed(2)}
+    <div className="h-full w-full bg-slate-900 flex flex-col items-center justify-center p-8 relative overflow-hidden group">
+      {/* Background with subtle red flush */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-red-900/20 via-slate-900 to-slate-900"></div>
+
+      <div className="relative z-10 text-center space-y-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-white/5 text-xs font-semibold text-slate-400 uppercase tracking-wider backdrop-blur-sm">
+          <Wallet size={14} />
+          {title}
         </div>
-        <p className="text-slate-400 text-sm">{subtitle}</p>
-        <div className="mt-8 p-4 bg-red-900/20 border border-red-500/30 rounded-xl">
-          <p className="text-red-400 font-bold">{tagText}</p>
+
+        <div className="relative inline-block">
+          <div className="text-5xl md:text-6xl font-mono text-slate-500 font-bold opacity-60">
+            R$ <CountUp end={value || 0} decimals={2} duration={2.5} separator="." decimal="," />
+          </div>
+          <div className="absolute top-1/2 left-0 w-full h-1 bg-red-500/50 -rotate-2 transform origin-center rounded-full"></div>
+        </div>
+
+        <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl max-w-xs mx-auto">
+          <p className="text-red-400 font-medium text-sm flex items-center justify-center gap-2">
+            <TrendingDown size={16} />
+            {tagText}
+          </p>
+        </div>
+
+        <p className="text-slate-500 text-sm max-w-xs mx-auto leading-relaxed">{subtitle}</p>
+      </div>
+    </div>
+  );
+};
+
+const I9Side = ({ result }: { result: SimulationResult }) => {
+  // Sustainability Metrics (Approximation)
+  const co2AvoidedKg = (result.estimatedConsumptionKwh * 12) * 0.1;
+  const treesSaved = Math.max(1, Math.round(co2AvoidedKg / 20));
+
+  return (
+    <div className="h-full w-full bg-emerald-950 flex flex-col items-center justify-center p-8 relative overflow-hidden group">
+      {/* Premium Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-900/40 via-slate-900 to-slate-900"></div>
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+
+      <div className="relative z-10 text-center space-y-4 w-full max-w-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400 uppercase tracking-widest backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.2)] mx-auto">
+          <Zap size={14} className="fill-current" />
+          Com a i9 Energy
+        </div>
+
+        <div className="relative">
+          <div className="absolute -inset-4 bg-emerald-500/20 blur-2xl rounded-full opacity-50 animate-pulse-slow"></div>
+          <div className="text-6xl md:text-7xl font-mono text-white font-bold drop-shadow-2xl relative">
+            R$ <CountUp end={result.newTotalValue} decimals={2} duration={3} separator="." decimal="," />
+          </div>
+        </div>
+
+        {/* Breakdown Mini-Table */}
+        <div className="grid grid-cols-2 gap-2 text-xs text-emerald-200/60 bg-white/5 p-3 rounded-lg border border-white/5">
+          <div className="text-left">Energia ({result.estimatedConsumptionKwh.toFixed(0)} kWh):</div>
+          <div className="text-right font-medium text-white">R$ {result.subscriptionCost.toFixed(2)}</div>
+          <div className="text-left">Taxa Distribuidora:</div>
+          <div className="text-right font-medium text-white">R$ {result.residualBill.toFixed(2)}</div>
+        </div>
+
+        {/* Savings Card */}
+        <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 p-4 rounded-xl backdrop-blur-md shadow-2xl relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-400/20 blur-2xl rounded-full -mr-10 -mt-10"></div>
+          <div className="relative z-10 flex flex-col items-center">
+            <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-wider mb-1 opacity-80">Economia Anual</p>
+            <div className="flex items-center gap-2 text-white">
+              <Trophy size={18} className="text-yellow-400 fill-yellow-400/20" />
+              <span className="text-2xl font-extrabold tracking-tight">
+                R$ <CountUp end={result.annualSavings} decimals={2} duration={3.5} separator="." decimal="," />
+              </span>
+            </div>
+
+            <div className="w-full h-px bg-emerald-500/20 my-3"></div>
+
+            {/* Impact Row */}
+            <div className="flex justify-between w-full px-2 gap-2">
+              <div className="flex flex-col items-center">
+                <Sparkles size={14} className="text-emerald-300 mb-1" />
+                <span className="text-[10px] text-emerald-100/70 font-medium">Sustentável</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <ShieldCheck size={14} className="text-emerald-300 mb-1" />
+                <span className="text-[10px] text-emerald-100/70 font-medium">Garantido</span>
+              </div>
+              <div className="flex flex-col items-center" title="Estimativa de impacto ambiental">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-sm font-bold text-white">{treesSaved}</span>
+                  <span className="text-[10px] text-emerald-100/70">Árvores</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const I9Side = ({ result }: { result: SimulationResult }) => (
-  <div className="h-full w-full bg-emerald-950 flex flex-col items-center justify-center p-8 relative overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-bl from-emerald-900 to-slate-900"></div>
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/10 via-transparent to-transparent"></div>
-    <div className="relative z-10 text-center">
-      <h3 className="text-xl font-bold text-emerald-400 uppercase tracking-widest mb-4">Com a i9 Energy</h3>
-      <div className="text-6xl font-mono text-white mb-2 font-bold drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-        R$ {result.newTotalValue.toFixed(2)}
-      </div>
-      <p className="text-emerald-200 text-sm mb-6">Mensalidade Otimizada</p>
-
-      {/* Total Annual Savings Highlight */}
-      <div className="mt-2 p-6 bg-emerald-500/20 border border-emerald-500/50 rounded-2xl animate-pulse shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-        <p className="text-emerald-100 text-xs uppercase tracking-wider mb-1">Economia Anual Total</p>
-        <p className="text-white font-extrabold text-3xl">
-          R$ {result.annualSavings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-        </p>
-        {result.extraSavings > 0 && (
-          <p className="text-emerald-300 text-xs mt-2 border-t border-emerald-500/30 pt-2">
-            (+ R$ {result.extraSavings?.toFixed(2)} vs Concorrência)
-          </p>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
 export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) => {
+  // Fire confetti on mount
+  useEffect(() => {
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 2,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#10b981', '#34d399', '#fbbf24']
+      });
+      confetti({
+        particleCount: 2,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#10b981', '#34d399', '#fbbf24']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
+  }, []);
+
+
+
   const chartData = [
     { name: result.hasCompetitor ? 'Concorrente' : 'Atual', valor: (result.hasCompetitor ? result.competitorTotalValue : result.originalBillValue), color: '#94a3b8' },
     { name: 'Com i9', valor: result.newTotalValue, color: '#10B981' },
@@ -98,25 +189,86 @@ export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) 
         {/* Shared Bottom Section (Chart & CTA) */}
         <div className="bg-slate-900 p-8 border-t border-white/5">
           {/* ... Chart ... */}
-          <div className="h-64 w-full mt-4 mb-8">
+          {/* ... Chart ... */}
+          <div className="h-72 w-full mt-4 mb-8 relative">
+            {/* Chart Title Overlay */}
+            <div className="absolute top-0 right-0 p-2 z-10 pointer-events-none">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-800/50 px-3 py-1 rounded-full border border-white/5">
+                <TrendingDown size={14} className="text-emerald-500" />
+                Comparativo Visual
+              </div>
+            </div>
+
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
-                <Tooltip
-                  cursor={{ fill: '#334155', opacity: 0.2 }}
-                  contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
-                  itemStyle={{ color: '#f8fafc' }}
+              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="barGradientActual" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#94a3b8" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#475569" stopOpacity={0.6} />
+                  </linearGradient>
+                  <linearGradient id="barGradientI9" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#059669" stopOpacity={0.8} />
+                  </linearGradient>
+                  <filter id="glow" height="130%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="3" />
+                    <feOffset dx="0" dy="0" result="offsetblur" />
+                    <feFlood floodColor="#10b981" floodOpacity="0.5" />
+                    <feComposite in2="offsetblur" operator="in" />
+                    <feMerge>
+                      <feMergeNode />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.4} />
+                <XAxis
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  fontSize={14}
+                  fontWeight={600}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={{ fill: '#cbd5e1' }}
+                  dy={10}
                 />
-                <Bar dataKey="valor" radius={[4, 4, 0, 0]}>
+                <YAxis
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `R$${value}`}
+                />
+                <Tooltip
+                  cursor={{ fill: '#334155', opacity: 0.1 }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-slate-800/90 backdrop-blur-md border border-white/10 p-4 rounded-xl shadow-xl">
+                          <p className="text-slate-400 text-xs uppercase mb-1">{label}</p>
+                          <p className="text-white font-bold text-xl">
+                            R$ {Number(payload[0].value).toFixed(2)}
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar dataKey="valor" radius={[6, 6, 0, 0]} animationDuration={1500}>
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={index === 1 ? "url(#barGradientI9)" : "url(#barGradientActual)"}
+                      filter={index === 1 ? "url(#glow)" : ""}
+                    />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+
 
           <div className="space-y-4">
             <Button fullWidth className="text-lg py-5 shadow-xl shadow-orange-500/30" onClick={onProceed}>

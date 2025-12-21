@@ -51,9 +51,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
         }
 
         if (error.message.includes('Invalid login credentials')) {
-          console.warn("Supabase auth failed, falling back to demo mode");
-          onLoginSuccess(null);
-          onClose();
+          console.warn("Invalid credentials");
+          alert("Email ou senha incorretos.");
+          setIsLoading(false);
           return;
         }
 
@@ -62,8 +62,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
 
     } catch (err) {
       console.error(err);
-      onLoginSuccess(null);
-      onClose();
+      alert("Ocorreu um erro ao tentar entrar.");
     } finally {
       setIsLoading(false);
     }

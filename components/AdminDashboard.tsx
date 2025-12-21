@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 import { DatabaseLead } from '../types';
-import { FileText, Phone, Mail, Calendar, Search, LogOut, Download, Trash2, Filter, FileSpreadsheet, CheckCircle, XCircle, Clock, LayoutDashboard } from 'lucide-react';
+import { FileText, Phone, Mail, Calendar, Search, LogOut, Download, Trash2, Filter, FileSpreadsheet, CheckCircle, XCircle, Clock, LayoutDashboard, Link, Copy } from 'lucide-react';
 import { Button } from './ui/Button';
 import { KanbanBoard, KanbanColumn } from './ui/trello-kanban-board';
+import { calculateSavings } from '../services/energyCalculator';
+import { PhaseType, Distribuidora } from '../types';
 
 interface AdminDashboardProps {
     onLogout: () => void;
@@ -15,7 +17,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState<'all' | 'new' | 'contacted' | 'contract_signed' | 'lost'>('all');
     const [viewMode, setViewMode] = useState<'table' | 'kanban'>('kanban');
-    const [activeModule, setActiveModule] = useState<'leads' | 'candidates'>('leads');
+    const [activeModule, setActiveModule] = useState<'leads' | 'candidates' | 'team'>('leads');
     const [candidates, setCandidates] = useState<any[]>([]);
 
     // Mobile Check
@@ -32,10 +34,83 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     const ROWS_PER_PAGE = 20;
     const [totalLeads, setTotalLeads] = useState(0);
 
+    const [teamMembers, setTeamMembers] = useState<any[]>([]);
+
+    // Modal State for adding new admins
+    const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+    const [newAdminName, setNewAdminName] = useState('');
+    const [newAdminEmail, setNewAdminEmail] = useState('');
+    const [adminToDelete, setAdminToDelete] = useState<string | null>(null);
+
+    // Link Generator State
+    const [showLinkGenerator, setShowLinkGenerator] = useState(false);
+    const [partnerName, setPartnerName] = useState('');
+    const [generatedLink, setGeneratedLink] = useState('');
+
+    const handleGenerateLink = () => {
+        if (!partnerName) return;
+        // Clean partner name for URL (remove spaces, special chars)
+        const cleanName = partnerName.trim().replace(/\s+/g, '_').toLowerCase();
+        const link = `${window.location.origin}/?parceiro=${encodeURIComponent(cleanName)}`;
+        setGeneratedLink(link);
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(generatedLink);
+        alert('Link copiado!');
+    };
+
     useEffect(() => {
+        console.log("Admin Dashboard - Component Loaded (V2)");
         if (activeModule === 'leads') fetchLeads();
         if (activeModule === 'candidates') fetchCandidates();
-    }, [activeModule, page]); // Refetch when page changes
+        if (activeModule === 'team') fetchTeam();
+    }, [activeModule, page]);
+
+    const fetchTeam = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase.from('admin_whitelist').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            setTeamMembers(data || []);
+        } catch (error) {
+            console.error('Error fetching team:', error);
+            setTeamMembers([]); // No fake data
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const confirmAddAdmin = async (name: string, email: string) => {
+        if (!email || !name) {
+            alert("Preencha todos os campos.");
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase.from('admin_whitelist').insert([{ email, name }]).select();
+            if (error) throw error;
+            if (data) setTeamMembers(prev => [data[0], ...prev]);
+            setShowAddAdminModal(false);
+            setNewAdminName('');
+            setNewAdminEmail('');
+        } catch (error: any) {
+            console.error('Error adding admin:', error);
+            alert(`Erro ao adicionar: ${error.message || 'Erro desconhecido'}`);
+        }
+    };
+
+    const handleRemoveAdmin = async (id: string) => {
+        try {
+            const { error } = await supabase.from('admin_whitelist').delete().eq('id', id);
+            if (error) throw error;
+            setTeamMembers(prev => prev.filter(m => m.id !== id));
+            setAdminToDelete(null); // Close modal
+        } catch (error: any) {
+            console.error('Error removing admin:', error);
+            alert(`Erro ao remover: ${error.message}`);
+        }
+    };
 
     const fetchCandidates = async () => {
         setLoading(true);
@@ -163,7 +238,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                             <div className="absolute inset-0 bg-energisa-orange blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
                             <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 p-1 rounded-xl shadow-xl transform group-hover:scale-105 transition-transform duration-300 border border-white/10">
                                 <img
-                                    src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/Gemini_Generated_Image_iogyo7iogyo7iogynova%20logo%20i9enrgy%20oficial%20(1)sem%20fundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL0dlbWluaV9HZW5lcmF0ZWRfSW1hZ2VfaW9neW83aW9neW83aW9neW5vdmEgbG9nbyBpOWVucmd5IG9maWNpYWwgKDEpc2VtIGZ1bmRvLnBuZyIsImlhdCI6MTc2NTk4NTI1NiwiZXhwIjoyMDgxMzQ1MjU2fQ.CNhqEuKjCQCGZQE4ZpBos1VtRHZCYlcDZnZmzUe5bcg"
+                                    src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logo%20natal%20para%20tira%20o%20fundo%20fera%20(2).png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ28gbmF0YWwgcGFyYSB0aXJhIG8gZnVuZG8gZmVyYSAoMikucG5nIiwiaWF0IjoxNzY2MTgwMjgwLCJleHAiOjIwODE1NDAyODB9.kma_9qGrVRxfkY1Tgd_dLctoIldfjJeXuxuwC9y4VzQ"
                                     alt="Logo"
                                     className="w-10 h-10 object-contain"
                                 />
@@ -184,6 +259,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 >
                                     Candidatos
                                 </button>
+                                <button
+                                    onClick={() => setActiveModule('team')}
+                                    className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded transition-colors ${activeModule === 'team' ? 'bg-purple-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                                >
+                                    Equipe
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -191,6 +272,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         <Button onClick={handleExport} variant="outline" className="hidden md:flex text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/50 shadow-lg shadow-emerald-500/10 transition-all duration-300 transform hover:-translate-y-1">
                             <FileSpreadsheet size={18} className="mr-2" />
                             Exportar Excel
+                        </Button>
+                        <Button onClick={() => setShowLinkGenerator(true)} variant="outline" className="flex text-blue-400 border-blue-500/20 hover:bg-blue-500/10 hover:border-blue-500/50 shadow-lg shadow-blue-500/10 transition-all duration-300 transform hover:-translate-y-1">
+                            <Link size={18} className="md:mr-2" />
+                            <span className="hidden md:inline">Gerar Link</span>
                         </Button>
                         <div className="h-8 w-px bg-white/10 mx-2 hidden md:block"></div>
                         <div className="flex items-center gap-3">
@@ -204,7 +289,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                     </div>
                 </div>
-            </header>
+            </header >
 
             <main className="container mx-auto px-6 py-10 relative z-10">
                 {/* 3D Stats Row (Visual Only for now) */}
@@ -304,10 +389,59 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 <div className="overflow-x-auto min-h-[600px] animate-in fade-in zoom-in-95 duration-500">
                                     <KanbanBoard
                                         columns={[
-                                            { id: 'new', title: 'Novos Leads', tasks: filteredLeads.filter(l => l.status === 'new' || !l.status).map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
-                                            { id: 'contacted', title: 'Em Negociação', tasks: filteredLeads.filter(l => l.status === 'contacted').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]], assignee: l.whatsapp ? 'Zap' : undefined })) },
-                                            { id: 'contract_signed', title: 'Fechados', tasks: filteredLeads.filter(l => l.status === 'contract_signed').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
-                                            { id: 'lost', title: 'Perdidos', tasks: filteredLeads.filter(l => l.status === 'lost').map(l => ({ id: l.id!, title: l.name, description: `R$ ${l.bill_value.toLocaleString('pt-BR')} - ${l.phase}`, labels: [l.distribuidora.split(' ')[0]] })) },
+                                            {
+                                                id: 'new',
+                                                title: 'Novos Leads',
+                                                tasks: filteredLeads.filter(l => l.status === 'new' || !l.status).map(l => {
+                                                    const savings = calculateSavings({ billValue: l.bill_value, phase: l.phase as PhaseType, distribuidora: l.distribuidora as Distribuidora, hasCompetitor: false }).monthlySavings;
+                                                    return {
+                                                        id: l.id!,
+                                                        title: l.name,
+                                                        description: `Conta: R$ ${l.bill_value} | Econ: R$ ${savings.toFixed(0)}`,
+                                                        labels: [l.distribuidora.split(' ')[0]]
+                                                    };
+                                                })
+                                            },
+                                            {
+                                                id: 'contacted',
+                                                title: 'Em Negociação',
+                                                tasks: filteredLeads.filter(l => l.status === 'contacted').map(l => {
+                                                    const savings = calculateSavings({ billValue: l.bill_value, phase: l.phase as PhaseType, distribuidora: l.distribuidora as Distribuidora, hasCompetitor: false }).monthlySavings;
+                                                    return {
+                                                        id: l.id!,
+                                                        title: l.name,
+                                                        description: `Conta: R$ ${l.bill_value} | Econ: R$ ${savings.toFixed(0)}`,
+                                                        labels: [l.distribuidora.split(' ')[0]],
+                                                        assignee: l.whatsapp ? 'Zap' : undefined
+                                                    };
+                                                })
+                                            },
+                                            {
+                                                id: 'contract_signed',
+                                                title: 'Fechados',
+                                                tasks: filteredLeads.filter(l => l.status === 'contract_signed').map(l => {
+                                                    const savings = calculateSavings({ billValue: l.bill_value, phase: l.phase as PhaseType, distribuidora: l.distribuidora as Distribuidora, hasCompetitor: false }).monthlySavings;
+                                                    return {
+                                                        id: l.id!,
+                                                        title: l.name,
+                                                        description: `Conta: R$ ${l.bill_value} | Econ: R$ ${savings.toFixed(0)}`,
+                                                        labels: [l.distribuidora.split(' ')[0]]
+                                                    };
+                                                })
+                                            },
+                                            {
+                                                id: 'lost',
+                                                title: 'Perdidos',
+                                                tasks: filteredLeads.filter(l => l.status === 'lost').map(l => {
+                                                    const savings = calculateSavings({ billValue: l.bill_value, phase: l.phase as PhaseType, distribuidora: l.distribuidora as Distribuidora, hasCompetitor: false }).monthlySavings;
+                                                    return {
+                                                        id: l.id!,
+                                                        title: l.name,
+                                                        description: `Conta: R$ ${l.bill_value} | Econ: R$ ${savings.toFixed(0)}`,
+                                                        labels: [l.distribuidora.split(' ')[0]]
+                                                    };
+                                                })
+                                            },
                                         ]}
                                         columnColors={{
                                             new: 'bg-blue-500/20',
@@ -339,6 +473,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                         <th className="px-8 py-6">Cliente</th>
                                                         <th className="px-8 py-6">Contato</th>
                                                         <th className="px-8 py-6">Potencial</th>
+                                                        <th className="px-8 py-6">Parceiro</th>
                                                         <th className="px-8 py-6">Status</th>
                                                     </tr>
                                                 </thead>
@@ -397,20 +532,51 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                                         R$ {lead.bill_value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                                     </span>
 
+                                                                    {(() => {
+                                                                        // Smart Calculation for Admin
+                                                                        try {
+                                                                            const result = calculateSavings({
+                                                                                billValue: lead.bill_value,
+                                                                                phase: lead.phase as PhaseType,
+                                                                                distribuidora: lead.distribuidora as Distribuidora,
+                                                                                hasCompetitor: false // Default for quick view
+                                                                            });
+
+                                                                            return (
+                                                                                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                                                                    Econ: R$ {result.monthlySavings.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}/mês
+                                                                                </span>
+                                                                            );
+                                                                        } catch (e) {
+                                                                            return null;
+                                                                        }
+                                                                    })()}
+
                                                                     {lead.bill_url ? (
                                                                         <a
                                                                             href={lead.bill_url}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
-                                                                            className="text-xs font-semibold text-energisa-orange hover:text-orange-300 flex items-center transition-colors px-2 py-1 -ml-2 rounded hover:bg-orange-500/10"
+                                                                            className="text-xs font-semibold text-energisa-orange hover:text-orange-300 flex items-center transition-colors px-2 py-1 -ml-2 rounded hover:bg-orange-500/10 mt-1"
                                                                         >
                                                                             <Download size={12} className="mr-1.5" />
                                                                             Ver Fatura
                                                                         </a>
                                                                     ) : (
-                                                                        <span className="text-slate-600 text-xs italic">Sem anexo</span>
+                                                                        <span className="text-slate-600 text-xs italic mt-1">Sem anexo</span>
                                                                     )}
                                                                 </div>
+                                                            </td>
+
+                                                            {/* Referral Info */}
+                                                            <td className="px-8 py-5">
+                                                                {lead.referral_id ? (
+                                                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                                        {lead.referral_id}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-slate-600 text-xs">-</span>
+                                                                )}
                                                             </td>
 
                                                             {/* Status & Actions */}
@@ -460,7 +626,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         </div>
                                     )}
                                 </div>
-                            )}
+                            )
+                            }
 
                             {/* Pagination Controls */}
                             <div className="flex items-center justify-between px-2 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-slate-900/50 p-4 rounded-xl border border-white/5">
@@ -486,8 +653,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                     </Button>
                                 </div>
                             </div>
-                        </div>
-                    ) : (
+                        </div >
+                    ) : activeModule === 'candidates' ? (
                         // CANDIDATES VIEW
                         <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
                             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
@@ -542,9 +709,226 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                 )}
                             </div>
                         </div>
-                    )
+                    ) : activeModule === 'team' ? (
+                        <div className="relative bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500"></div>
+                            <div className="p-8">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-white">Gerenciar Equipe</h2>
+                                        <p className="text-slate-400">Adicione pessoas que podem acessar este painel.</p>
+                                    </div>
+                                    <Button onClick={() => setShowAddAdminModal(true)} className="bg-purple-600 hover:bg-purple-700">
+                                        + Novo Admin
+                                    </Button>
+                                </div>
+
+
+
+                                <div className="grid gap-4">
+                                    {teamMembers.map((member) => (
+                                        <div key={member.id} className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-white/5 hover:border-purple-500/30 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl">
+                                                    {(member.name || member.email).charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-white">{member.name || 'Sem nome'}</h3>
+                                                    <p className="text-sm text-slate-400">{member.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                                                    Admin
+                                                </span>
+                                                <button
+                                                    onClick={() => setAdminToDelete(member.id)}
+                                                    className="text-slate-500 hover:text-red-400 transition-colors"
+                                                    title="Remover Admin"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+
+
+
+                                    {teamMembers.length === 0 && (
+                                        <div className="text-center py-8 text-slate-500 italic">
+                                            Nenhum administrador encontrado.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ) : null
                 }
             </main >
+            {/* Modals moved to root to avoid cut-off */}
+            {
+                showAddAdminModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+                            <h3 className="text-xl font-bold text-white mb-4">Novo Administrador</h3>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm text-slate-400 mb-1">Nome</label>
+                                    <input
+                                        autoFocus
+                                        type="text"
+                                        placeholder="Ex: João Silva"
+                                        value={newAdminName}
+                                        onChange={(e) => setNewAdminName(e.target.value)}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-slate-400 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        placeholder="joao@exemplo.com"
+                                        value={newAdminEmail}
+                                        onChange={(e) => setNewAdminEmail(e.target.value)}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 mt-6 justify-end">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setShowAddAdminModal(false);
+                                        setNewAdminName('');
+                                        setNewAdminEmail('');
+                                    }}
+                                    className="text-slate-400 hover:text-white"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    onClick={() => confirmAddAdmin(newAdminName, newAdminEmail)}
+                                    className="bg-purple-600 hover:bg-purple-700"
+                                >
+                                    Adicionar
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {
+                adminToDelete && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+                            <div className="flex flex-col items-center text-center mb-6">
+                                <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mb-4">
+                                    <Trash2 size={24} className="text-red-500" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">Remover Administrador?</h3>
+                                <p className="text-slate-400 text-sm">
+                                    Tem certeza que deseja remover este acesso? Essa ação não pode ser desfeita.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3 justify-center">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setAdminToDelete(null)}
+                                    className="text-slate-400 hover:text-white"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    onClick={() => handleRemoveAdmin(adminToDelete)}
+                                    className="bg-red-500 hover:bg-red-600 border-none text-white"
+                                >
+                                    Sim, Remover
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Link Generator Modal */}
+            {
+                showLinkGenerator && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400">
+                                    <Link size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Gerar Link de Parceiro</h3>
+                                    <p className="text-slate-400 text-sm">Crie links exclusivos para rastrear indicações.</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm text-slate-400 mb-1">Nome do Parceiro / Escritório</label>
+                                    <input
+                                        autoFocus
+                                        type="text"
+                                        placeholder="Ex: Contabilidade Silva"
+                                        value={partnerName}
+                                        onChange={(e) => {
+                                            setPartnerName(e.target.value);
+                                            setGeneratedLink(''); // Reset link on change
+                                        }}
+                                        className="w-full bg-slate-800 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <p className="text-xs text-slate-500 mt-2">
+                                        O sistema transformará espaços em "_" automaticamente.
+                                    </p>
+                                </div>
+
+                                {generatedLink && (
+                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <label className="block text-sm text-slate-400 mb-1">Link Gerado</label>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 bg-slate-950/50 border border-white/5 rounded-lg px-3 py-2 text-sm text-blue-400 font-mono break-all">
+                                                {generatedLink}
+                                            </div>
+                                            <Button onClick={copyToClipboard} size="icon" className="shrink-0 bg-blue-600 hover:bg-blue-700">
+                                                <Copy size={18} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex gap-3 mt-8 justify-end">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setShowLinkGenerator(false);
+                                        setPartnerName('');
+                                        setGeneratedLink('');
+                                    }}
+                                    className="text-slate-400 hover:text-white"
+                                >
+                                    Fechar
+                                </Button>
+                                {!generatedLink && (
+                                    <Button
+                                        onClick={handleGenerateLink}
+                                        disabled={!partnerName}
+                                        className="bg-blue-600 hover:bg-blue-700 data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
+                                    >
+                                        Criar Link
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div >
     );
 };

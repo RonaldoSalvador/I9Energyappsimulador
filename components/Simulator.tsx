@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { PhaseType, Distribuidora, SimulationParams, SimulationResult, LeadData } from '../types';
 import { calculateSavings } from '../services/energyCalculator';
 import { Button } from './ui/Button';
-import { ArrowLeft, Check, Loader2, UploadCloud, FileText, X, AlertCircle, Zap, Coins, Calculator, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, UploadCloud, FileText, X, AlertCircle, Zap, Coins, Calculator, CheckCircle2, Banknote } from 'lucide-react';
 import { LocationMap } from './ui/expand-map';
 import { Results } from './Results';
 import { SuccessStep } from './SuccessStep';
@@ -18,6 +18,16 @@ export const Simulator: React.FC<SimulatorProps> = ({ onOpenLegal }) => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Capture Referral ID on Mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const partnerId = params.get('parceiro');
+    if (partnerId) {
+      console.log("Partner Code Detected:", partnerId);
+      setLeadData(prev => ({ ...prev, referralId: partnerId }));
+    }
+  }, []);
 
   const [formData, setFormData] = useState<SimulationParams>({
     billValue: 350,
@@ -72,6 +82,7 @@ export const Simulator: React.FC<SimulatorProps> = ({ onOpenLegal }) => {
           phase: formData.phase,
           distribuidora: formData.distribuidora,
           bill_url: publicUrl,
+          referral_id: leadData.referralId || null,
           status: 'new'
         }]);
 
@@ -117,7 +128,7 @@ export const Simulator: React.FC<SimulatorProps> = ({ onOpenLegal }) => {
   if (step === 5) {
     return (
       <div className="w-full max-w-2xl mx-auto">
-        <SuccessStep leadName={leadData.name} whatsapp={leadData.whatsapp} hasUploadedBill={!!leadData.billFile} />
+        <SuccessStep leadName={leadData.name} whatsapp={leadData.whatsapp} hasUploadedBill={!!leadData.billFile} result={result} />
       </div>
     );
   }
@@ -129,6 +140,19 @@ export const Simulator: React.FC<SimulatorProps> = ({ onOpenLegal }) => {
       </div>
     );
   }
+  const maskPhone = (value: string) => {
+    // Remove everything that is not a digit
+    const numbers = value.replace(/\D/g, "");
+
+    // Apply (XX) XXXXX-XXXX mask
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/(\d{2})/, "($1) ")
+        .replace(/(\d{5})(\d{4})/, "$1-$2");
+    }
+
+    return value.substring(0, 15); // Limit max length
+  };
 
   return (
     <div className="w-full max-w-xl mx-auto relative group perspective">
@@ -270,8 +294,8 @@ export const Simulator: React.FC<SimulatorProps> = ({ onOpenLegal }) => {
             {step === 2 && (
               <div className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-500">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-i9-green shadow-inner">
-                    <Coins size={32} />
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-400/20 to-emerald-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-emerald-600 border border-emerald-500/20 shadow-lg shadow-emerald-500/10 backdrop-blur-sm">
+                    <Banknote size={32} />
                   </div>
                   <h2 className="text-3xl font-bold text-slate-900">Média da Fatura</h2>
                   <p className="text-slate-500 mt-2 text-lg">Quanto você gasta por mês aproximadamente?</p>
@@ -347,8 +371,13 @@ export const Simulator: React.FC<SimulatorProps> = ({ onOpenLegal }) => {
                         type="tel"
                         className="w-full rounded-xl border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 border-2 p-3.5 focus:ring-4 focus:ring-orange-500/20 focus:border-energisa-orange outline-none transition-all"
                         placeholder="(DDD) 99999-9999"
+                        maxLength={15}
                         value={leadData.whatsapp}
-                        onChange={(e) => setLeadData({ ...leadData, whatsapp: e.target.value })}
+                        onChange={(e) => {
+                          // Apply mask as user types
+                          const masked = maskPhone(e.target.value);
+                          setLeadData({ ...leadData, whatsapp: masked });
+                        }}
                       />
                     </div>
                   </div>
