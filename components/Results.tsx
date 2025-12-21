@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+// Optimizing mobile performance
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 
 import { SimulationResult } from '../types';
