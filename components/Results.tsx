@@ -35,9 +35,7 @@ const CompetitorSide = ({ result }: { result: SimulationResult }) => {
         </div>
 
         <div className="relative inline-block">
-          <div className="text-5xl md:text-6xl font-mono text-slate-500 font-bold opacity-60">
-            R$ <CountUp end={value || 0} decimals={2} duration={2.5} separator="." decimal="," />
-          </div>
+          R$ <CountUp end={value || 0} decimals={2} duration={1} separator="." decimal="," />
           <div className="absolute top-1/2 left-0 w-full h-1 bg-red-500/50 -rotate-2 transform origin-center rounded-full"></div>
         </div>
 
@@ -73,9 +71,7 @@ const I9Side = ({ result }: { result: SimulationResult }) => {
 
         <div className="relative">
           <div className="absolute -inset-4 bg-emerald-500/20 blur-2xl rounded-full opacity-50 animate-pulse-slow"></div>
-          <div className="text-6xl md:text-7xl font-mono text-white font-bold drop-shadow-2xl relative">
-            R$ <CountUp end={result.newTotalValue} decimals={2} duration={3} separator="." decimal="," />
-          </div>
+          R$ <CountUp end={result.newTotalValue} decimals={2} duration={1.5} separator="." decimal="," />
         </div>
 
         {/* Breakdown Mini-Table */}
@@ -94,7 +90,7 @@ const I9Side = ({ result }: { result: SimulationResult }) => {
             <div className="flex items-center gap-2 text-white">
               <Trophy size={18} className="text-yellow-400 fill-yellow-400/20" />
               <span className="text-2xl font-extrabold tracking-tight">
-                R$ <CountUp end={result.annualSavings} decimals={2} duration={3.5} separator="." decimal="," />
+                R$ <CountUp end={result.annualSavings} decimals={2} duration={1.5} separator="." decimal="," />
               </span>
             </div>
 
@@ -164,7 +160,7 @@ export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) 
           />
 
           {/* Floating Label Instructions */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center pointer-events-none z-40">
+          <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 text-center pointer-events-none z-40">
             <p className="text-xs text-white/50 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
               Passe o mouse para comparar
             </p>
