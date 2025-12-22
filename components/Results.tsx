@@ -18,7 +18,7 @@ interface ResultsProps {
 
 const CompetitorSide = ({ result }: { result: SimulationResult }) => {
   const isCompetitor = result.hasCompetitor;
-  const title = isCompetitor ? "Sua Situação Atual" : "Fatura Atual";
+  const title = isCompetitor ? "Sua Situação Atual" : "Sua Fatura Hoje";
   const value = isCompetitor ? result.competitorTotalValue : result.originalBillValue;
   const subtitle = isCompetitor ? 'Valor aproximado com seu desconto atual' : 'Sem o plano i9 Energy';
   const tagText = isCompetitor ? "Desconto Baixo" : "Preço Cheio";
@@ -29,7 +29,7 @@ const CompetitorSide = ({ result }: { result: SimulationResult }) => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-red-900/20 via-slate-900 to-slate-900"></div>
 
       <div className="relative z-10 text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-white/5 text-xs font-semibold text-slate-400 uppercase tracking-wider backdrop-blur-sm">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-white/5 text-xs font-semibold text-slate-400 uppercase tracking-wider backdrop-blur-none md:backdrop-blur-sm">
           <Wallet size={14} />
           {title}
         </div>
@@ -64,13 +64,14 @@ const I9Side = ({ result }: { result: SimulationResult }) => {
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
 
       <div className="relative z-10 text-center space-y-4 w-full max-w-sm">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400 uppercase tracking-widest backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.2)] mx-auto">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-400 uppercase tracking-widest backdrop-blur-none md:backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.2)] mx-auto">
           <Zap size={14} className="fill-current" />
-          Com a i9 Energy
+          Nova Mensalidade i9
         </div>
 
         <div className="relative">
           <div className="absolute -inset-4 bg-emerald-500/20 blur-2xl rounded-full opacity-50 animate-pulse-slow"></div>
+          <p className="text-emerald-100/70 text-xs mb-1 font-medium">Você pagará apenas:</p>
           R$ <CountUp end={result.newTotalValue} decimals={2} duration={1.5} separator="." decimal="," />
         </div>
 
@@ -83,7 +84,7 @@ const I9Side = ({ result }: { result: SimulationResult }) => {
         </div>
 
         {/* Savings Card */}
-        <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 p-4 rounded-xl backdrop-blur-md shadow-2xl relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
+        <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 p-4 rounded-xl backdrop-blur-none md:backdrop-blur-md shadow-2xl relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
           <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-400/20 blur-2xl rounded-full -mr-10 -mt-10"></div>
           <div className="relative z-10 flex flex-col items-center">
             <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-wider mb-1 opacity-80">Economia Anual</p>
