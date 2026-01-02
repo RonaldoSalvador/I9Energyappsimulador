@@ -2,8 +2,6 @@ import React from 'react';
 import { ArrowRight, CheckCircle2, Sun, Zap } from 'lucide-react';
 import { Button } from './ui/Button';
 
-import { Countdown } from './Countdown';
-
 import { ASSETS } from '../constants/assets';
 
 interface HeroProps {
@@ -60,7 +58,6 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
             <p className="text-sm text-slate-400 font-medium mb-4">
               <span className="text-energisa-orange font-bold">Gratuito</span> e leva menos de 1 minuto
             </p>
-            <Countdown targetDate={`${new Date().getFullYear()}-12-31T23:59:59`} />
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 sm:gap-12 border-t border-white/5 pt-10">
