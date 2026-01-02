@@ -18,7 +18,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
             <div className="flex items-center space-x-2 mb-6">
               <div className="bg-white rounded-xl p-4 inline-block">
                 <img
-                  src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logo%20natal.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ28gbmF0YWwucG5nIiwiaWF0IjoxNzY2MTc3MzcxLCJleHAiOjIwODE1MzczNzF9.hRwSPuIxaVM8LrUkP0gK1yRYkpCIQz0_aqaTJ2u1uU4"
+                  src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logo%20i9%20energy.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ28gaTkgZW5lcmd5LnBuZyIsImlhdCI6MTc2NzM2Njg0MiwiZXhwIjoyMDgyNzI2ODQyfQ.rHQ42TIUA6oeNIv-d0oc5Quwd6zc1EQHhPLy9nSyMiM"
                   alt="i9 Energy Logo"
                   className="h-20 w-auto object-contain"
                 />

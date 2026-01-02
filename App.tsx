@@ -238,9 +238,6 @@ function App() {
 
             {/* Compliance */}
             <CookieConsent />
-
-            {/* Christmas Music Player */}
-            <MusicPlayer src={ASSETS.CHRISTMAS.MUSIC_THEME} />
          </div>
       </div>
    );

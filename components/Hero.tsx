@@ -2,7 +2,6 @@ import React from 'react';
 import { ArrowRight, CheckCircle2, Sun, Zap } from 'lucide-react';
 import { Button } from './ui/Button';
 
-import { SnowEffect } from './SnowEffect';
 import { Countdown } from './Countdown';
 
 import { ASSETS } from '../constants/assets';
@@ -15,30 +14,12 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
   return (
     <div className="relative overflow-hidden pt-16 pb-20 lg:pt-32 lg:pb-40">
 
-      {/* Snow Effect - Behind content but visible */}
-      <SnowEffect />
-
-      {/* User's Christmas Border (Top) - Restored & Fixed */}
-      <div className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none">
-        <img
-          src={ASSETS.CHRISTMAS.BORDER_TOP}
-          alt="Borda de Natal"
-          className="w-full h-full object-cover opacity-100 drop-shadow-2xl"
-        />
+      {/* Background Gradients (Blue/Dark Theme) */}
+      <div className="absolute top-0 inset-x-0 h-full w-full -z-20 bg-[#0f172a]">
+        {/* Subtle grid pattern or gradient if needed */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-[#0f172a] to-slate-900 opacity-80"></div>
       </div>
 
-
-
-      {/* User's Red Background Image */}
-      <div className="absolute top-0 inset-x-0 h-full w-full -z-20">
-        <img
-          src={ASSETS.CHRISTMAS.HERO_BG}
-          alt="Christmas Background"
-          className="w-full h-full object-cover opacity-100" // Opacity can be adjusted if too bright
-        />
-        {/* Optional Dark Overlay for Text Readability if needed */}
-        <div className="absolute inset-x-0 top-0 h-full w-full bg-black/40"></div>
-      </div>
       <div className="absolute -top-20 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[100px] -z-10 animate-float opacity-50"></div>
       <div className="absolute top-40 -left-20 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] -z-10 opacity-30" style={{ animationDelay: '2s' }}></div>
 
@@ -54,12 +35,10 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
           <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6">
             <span className="relative inline-block group cursor-default">
               Economize
-              {/* Espaço para enfeite 1 */}
             </span>
             {' '}
             <span className="relative inline-block text-energisa-orange group cursor-default">
-              60% neste Natal
-
+              até 30%
             </span>
             {' '}
             <span className="relative inline-block group cursor-default">
@@ -67,7 +46,7 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
             </span>
           </h1>
           <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Promoção exclusiva de Dezembro! Garanta <span className="font-bold text-energisa-orange">60% de desconto</span> na sua fatura agora. Nos outros meses, você continua economizando 30% garantidos. Sem obras, sem instalação e 100% digital.
+            Garanta <span className="font-bold text-energisa-orange">desconto garantido</span> na sua fatura todos os meses. Sem obras, sem instalação e 100% digital.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
