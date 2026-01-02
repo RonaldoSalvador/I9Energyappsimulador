@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../services/supabase';
 import { DatabaseLead } from '../types';
-import { FileText, Phone, Mail, Calendar, Search, LogOut, Download, Trash2, Filter, FileSpreadsheet, CheckCircle, XCircle, Clock, LayoutDashboard, Link, Copy } from 'lucide-react';
+import { FileText, Phone, Mail, Calendar, Search, LogOut, Download, Trash2, Filter, FileSpreadsheet, CheckCircle, XCircle, Clock, LayoutDashboard, Link, Copy, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
 import { KanbanBoard, KanbanColumn } from './ui/trello-kanban-board';
 import { calculateSavings } from '../services/energyCalculator';
@@ -150,13 +150,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!window.confirm('Tem certeza que deseja EXCLUIR este lead para sempre?')) return;
+    const [leadToDelete, setLeadToDelete] = useState<string | null>(null);
+
+    const handleDeleteClick = (id: string) => {
+        setLeadToDelete(id);
+    };
+
+    const confirmDeleteLead = async () => {
+        if (!leadToDelete) return;
 
         try {
-            const { error } = await supabase.from('leads').delete().eq('id', id);
+            const { error } = await supabase.from('leads').delete().eq('id', leadToDelete);
             if (error) throw error;
-            setLeads(prev => prev.filter(l => l.id !== id));
+            setLeads(prev => prev.filter(l => l.id !== leadToDelete));
+            setLeadToDelete(null);
         } catch (error) {
             console.error('Error deleting:', error);
             alert('Erro ao excluir');
@@ -174,31 +181,110 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         }
     };
 
-    const handleExport = () => {
-        const headers = ['Data', 'Nome', 'Email', 'WhatsApp', 'Distribuidora', 'Fase', 'Valor Conta', 'Status', 'Link Arquivo'];
-        const csvContent = [
-            headers.join(','),
-            ...leads.map(lead => [
-                new Date(lead.created_at || '').toLocaleDateString('pt-BR'),
-                `"${lead.name}"`,
-                lead.email || '',
-                lead.whatsapp,
-                lead.distribuidora,
-                lead.phase,
-                lead.bill_value,
-                lead.status,
-                lead.bill_url || ''
-            ].join(','))
-        ].join('\n');
+    const [isExporting, setIsExporting] = useState(false);
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', `leads_export_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+    const [deleteAllVerification, setDeleteAllVerification] = useState('');
+
+    const handleDeleteAllClick = () => {
+        setShowDeleteAllModal(true);
+        setDeleteAllVerification('');
+    };
+
+    const confirmDeleteAll = async () => {
+        if (deleteAllVerification !== 'DELETAR') {
+            alert('Por favor, digite "DELETAR" corretamente para confirmar.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const table = activeModule === 'leads' ? 'leads' : 'candidates';
+
+            // Using a filter effectively "all" with a valid UUID neq check
+            // Request count to verify if deletion actually happened
+            const { error, count } = await supabase
+                .from(table)
+                .delete({ count: 'estimated' })
+                .neq('id', '00000000-0000-0000-0000-000000000000');
+
+            if (error) throw error;
+
+            console.log(`Deleted ${count} rows from ${table}`);
+
+            if (activeModule === 'leads') {
+                setLeads([]);
+                setTotalLeads(0);
+            } else {
+                setCandidates([]);
+            }
+
+            // Se count for 0, pode ser que não tinha nada OU que a permissão falhou silenciosamente
+            if (count === 0) {
+                alert('Nenhum registro foi apagado. O banco de dados já estava vazio ou você precisa atualizar as permissões (SQL).');
+            } else {
+                // alert(`${activeModule === 'leads' ? 'Leads' : 'Candidatos'} excluídos com sucesso!`);
+            }
+            setShowDeleteAllModal(false);
+
+        } catch (error: any) {
+            console.error('Error deleting all:', error);
+            alert(`Erro ao excluir: ${error.message} - Verifique suas permissões.`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleExport = async () => {
+        try {
+            setIsExporting(true);
+            // Fetch all leads without pagination
+            const { data: allLeads, error } = await supabase
+                .from('leads')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!allLeads || allLeads.length === 0) {
+                alert('Nenhum lead encontrado para exportar.');
+                return;
+            }
+
+            const headers = ['Data', 'Nome', 'Email', 'WhatsApp', 'Distribuidora', 'Fase', 'Valor Conta', 'Status', 'Link Arquivo'];
+            const csvContent = [
+                headers.join(','),
+                ...allLeads.map(lead => [
+                    new Date(lead.created_at || '').toLocaleDateString('pt-BR'),
+                    `"${lead.name}"`,
+                    lead.email || '',
+                    lead.whatsapp,
+                    lead.distribuidora,
+                    lead.phase,
+                    lead.bill_value,
+                    lead.status,
+                    lead.bill_url || ''
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `leads_export_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Optional: Confirm success
+            // alert(`${allLeads.length} leads exportados com sucesso!`);
+
+        } catch (error) {
+            console.error('Error exporting:', error);
+            alert('Erro ao exportar leads. Tente novamente.');
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     const filteredLeads = leads.filter(lead => {
@@ -269,9 +355,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Button onClick={handleExport} variant="outline" className="hidden md:flex text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/50 shadow-lg shadow-emerald-500/10 transition-all duration-300 transform hover:-translate-y-1">
-                            <FileSpreadsheet size={18} className="mr-2" />
-                            Exportar Excel
+                        {(activeModule === 'leads' || activeModule === 'candidates') && (
+                            <Button
+                                onClick={handleDeleteAllClick}
+                                variant="outline"
+                                className="hidden md:flex text-red-400 border-red-500/20 hover:bg-red-500/10 hover:border-red-500/50 shadow-lg shadow-red-500/10 transition-all duration-300 transform hover:-translate-y-1"
+                                title="Apagar todos os registros"
+                            >
+                                <Trash2 size={18} className="mr-2" />
+                                Limpar Tudo
+                            </Button>
+                        )}
+                        <Button
+                            onClick={handleExport}
+                            disabled={isExporting}
+                            variant="outline"
+                            className="hidden md:flex text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/10 hover:border-emerald-500/50 shadow-lg shadow-emerald-500/10 transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-wait"
+                        >
+                            <FileSpreadsheet size={18} className={`mr-2 ${isExporting ? 'animate-pulse' : ''}`} />
+                            {isExporting ? 'Exportando...' : 'Exportar Excel'}
                         </Button>
                         <Button onClick={() => setShowLinkGenerator(true)} variant="outline" className="flex text-blue-400 border-blue-500/20 hover:bg-blue-500/10 hover:border-blue-500/50 shadow-lg shadow-blue-500/10 transition-all duration-300 transform hover:-translate-y-1">
                             <Link size={18} className="md:mr-2" />
@@ -597,7 +699,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                                     </div>
 
                                                                     <button
-                                                                        onClick={() => handleDelete(lead.id!)}
+                                                                        onClick={() => handleDeleteClick(lead.id!)}
                                                                         className="text-slate-600 hover:text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-all transform hover:scale-110 opacity-0 group-hover:opacity-100"
                                                                         title="Excluir"
                                                                     >
@@ -924,6 +1026,89 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                         Criar Link
                                     </Button>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Delete Lead Modal */}
+            {
+                leadToDelete && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+                            <div className="flex flex-col items-center text-center mb-6">
+                                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4 animate-bounce-slow">
+                                    <Trash2 size={32} className="text-red-500" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">Excluir Lead?</h3>
+                                <p className="text-slate-400 text-sm">
+                                    Esta ação removerá permanentemente este contato e todos os dados associados. Não pode ser desfeito.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3 justify-center">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setLeadToDelete(null)}
+                                    className="text-slate-400 hover:text-white hover:bg-white/5"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    onClick={confirmDeleteLead}
+                                    className="bg-red-500 hover:bg-red-600 border-none text-white shadow-lg shadow-red-500/20"
+                                >
+                                    Sim, Excluir
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {/* Delete All Modal */}
+            {
+                showDeleteAllModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                        <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+                            <div className="flex flex-col items-center text-center mb-6">
+                                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4 animate-bounce-slow">
+                                    <AlertCircle size={32} className="text-red-500" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">PERIGO: Apagar Tudo?</h3>
+                                <p className="text-slate-400 text-sm mb-4">
+                                    Esta ação apagará <strong>TODOS</strong> os {activeModule === 'leads' ? 'leads' : 'candidatos'} do banco de dados.
+                                    <br />
+                                    <span className="text-red-400 font-bold">Isso não pode ser desfeito.</span>
+                                </p>
+
+                                <div className="w-full mb-2">
+                                    <label className="block text-xs text-slate-500 mb-1">Digite "DELETAR" para confirmar:</label>
+                                    <input
+                                        type="text"
+                                        value={deleteAllVerification}
+                                        onChange={(e) => setDeleteAllVerification(e.target.value)}
+                                        className="w-full bg-slate-800 border-2 border-red-500/30 rounded-lg px-4 py-2 text-white text-center font-bold tracking-widest uppercase focus:outline-none focus:border-red-500 transition-colors"
+                                        placeholder="DELETAR"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 justify-center">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setShowDeleteAllModal(false)}
+                                    className="text-slate-400 hover:text-white hover:bg-white/5"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    onClick={confirmDeleteAll}
+                                    disabled={deleteAllVerification !== 'DELETAR'}
+                                    className="bg-red-600 hover:bg-red-700 border-none text-white shadow-lg shadow-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Confirmar Exclusão
+                                </Button>
                             </div>
                         </div>
                     </div>
