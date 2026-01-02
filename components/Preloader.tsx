@@ -30,10 +30,9 @@ export const Preloader: React.FC<PreloaderProps> = ({ onFinish }) => {
 
                 {/* Logo with Breathing Animation */}
                 <img
-                    src={ASSETS.CHRISTMAS.LOGO_SANTA}
+                    src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/Gemini_Generated_Image_iogyo7iogyo7iogynova%20logo%20i9enrgy%20oficial%20(1)sem%20fundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL0dlbWluaV9HZW5lcmF0ZWRfSW1hZ2VfaW9neW83aW9neW83aW9neW5vdmEgbG9nbyBpOWVucmd5IG9maWNpYWwgKDEpc2VtIGZ1bmRvLnBuZyIsImlhdCI6MTc2NzM2Njc5NSwiZXhwIjoyMDgyNzI2Nzk1fQ.I92lFt8hmKcxZnv44Tqz9wQpU-DkCgDNeiphDNG-Zhs"
                     alt="Loading..."
-                    className="w-48 md:w-64 h-auto object-contain relative z-10 animate-[bounce_2s_infinite]"
-                    style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
+                    className="w-48 md:w-64 h-auto object-contain relative z-10 animate-pulse"
                 />
 
                 {/* Loading Indicator */}
