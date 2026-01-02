@@ -81,7 +81,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal }) => {
         <div className="border-t border-slate-800 pt-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center text-xs text-slate-500">
           <p>© {new Date().getFullYear()} i9 Energy Soluções S.A.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <span className="flex items-center"><div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div> Sistema Operacional</span>
+            <span className="flex items-center"><div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div> Sistema Operacional v1.1</span>
           </div>
         </div>
       </div>
