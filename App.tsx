@@ -12,7 +12,6 @@ import { LegalModal, LegalContentType } from './components/LegalModal';
 import { Dashboard } from './components/Dashboard'; // Import Dashboard
 import { AdminDashboard } from './components/AdminDashboard';
 import { ShieldCheck, Zap, LineChart } from 'lucide-react';
-import { MusicPlayer } from './components/MusicPlayer';
 import { supabase } from './services/supabase';
 import { Preloader } from './components/Preloader';
 

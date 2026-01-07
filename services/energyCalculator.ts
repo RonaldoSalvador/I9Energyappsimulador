@@ -18,18 +18,14 @@ const MINIMUM_CONSUMPTION = {
 export const calculateSavings = (params: SimulationParams): SimulationResult => {
   const { billValue, phase } = params;
 
-  // 1. Estimate Consumption (kWh) based on current bill
-  // Formula: (Bill - CIP) / Tariff. Using simplified reverse calc for MVP.
+  // 1. Estimate Consumption (kWh)
   const estimatedConsumptionKwh = Math.round(billValue / CONSTANTS.TARIFA_MEDIA);
 
-  // 2. Define Regulatory Minimum (Custo de Disponibilidade)
+  // 2. Define Regulatory Minimum
   const minConsumptionKwh = MINIMUM_CONSUMPTION[phase];
 
   // 3. Calculate Compensable Energy
-  // The customer must pay at least the minimum to the utility.
-  // Credits can only offset consumption ABOVE the minimum.
   let compensableEnergyKwh = estimatedConsumptionKwh - minConsumptionKwh;
-
   if (compensableEnergyKwh < 0) {
     compensableEnergyKwh = 0;
   }
@@ -37,52 +33,74 @@ export const calculateSavings = (params: SimulationParams): SimulationResult => 
   // 4. Calculate Gross Value of Compensable Energy
   const grossCompensableValue = compensableEnergyKwh * CONSTANTS.TARIFA_MEDIA;
 
-  // 5. Calculate "Fio B" Tax (The "toll" for using the grid)
-  // Law 14.300/2022: In 2025, user pays 45% of Fio B component on compensated energy.
+  // 5. Calculate "Fio B" Tax
   const fioBTax = compensableEnergyKwh * CONSTANTS.TUSD_FIO_B * CONSTANTS.PERCENTUAL_FIO_B_2025;
 
-  // 6. Calculate Net Credit Value (Effective value of the injected energy)
-  // The credit covers the energy, but the user still pays the Fio B portion to utility (or it's deducted)
-  // In the subscription model, we usually treat it as:
-  // Subscription Price = (Gross Value - Fio B Cost) * (1 - Discount)
-
-  // We simplify: The customer "stops paying" the Gross Value to Energisa.
-  // Instead, they pay:
-  // a) Residual Bill to Energisa (Min + CIP + Fio B Tax)
-  // b) Subscription to i9 (Compensable Energy * Rate with Discount)
-
-  // i9 Price Calculation:
-  // The "value" delivered is the energy credit.
-  // i9 charges for that credit with a discount applied to the *net benefit*.
-
-  // Christmas Logic: 60% in December, 30% in other months
-  const currentMonth = new Date().getMonth(); // 0-11, 11 is December
-  const activeDiscount = currentMonth === 11 ? 0.60 : 0.30;
-
-  const subscriptionCost = (grossCompensableValue - fioBTax) * (1 - activeDiscount);
-
-  // 7. Calculate Residual Bill (Energisa)
+  // 6. Calculate Residual Bill (Fixed Utility Cost)
   const costOfAvailability = minConsumptionKwh * CONSTANTS.TARIFA_MEDIA;
   const residualBill = costOfAvailability + CONSTANTS.ILUM_PUBLICA + fioBTax;
 
-  // 8. Total New Monthly Cost
-  const newTotalValue = subscriptionCost + residualBill;
+  // --- NEW TIERED LOGIC ---
 
-  // 9. Savings
-  const monthlySavings = billValue - newTotalValue;
-  const annualSavings = monthlySavings * 12;
+  // Strategy: 
+  // Months 1-3: 50% Discount
+  // Months 4-12: Tiered Discount (25%, 28%, 30%)
+
+  // Tier Calculation for Months 4-12
+  let discount4to12 = 0.25; // Default < 1000
+  if (billValue > 4000) {
+    discount4to12 = 0.30;
+  } else if (billValue >= 1000) {
+    discount4to12 = 0.28;
+  }
+
+  const discount1to3 = 0.50;
+
+  // Calculate Costs for Period 1 (Months 1-3)
+  // Subscription = (Gross - FioB) * (1 - Discount)
+  const subscriptionCost1to3 = (grossCompensableValue - fioBTax) * (1 - discount1to3);
+  const totalCost1to3 = subscriptionCost1to3 + residualBill;
+  const savings1to3 = billValue - totalCost1to3;
+
+  // Calculate Costs for Period 2 (Months 4-12)
+  const subscriptionCost4to12 = (grossCompensableValue - fioBTax) * (1 - discount4to12);
+  const totalCost4to12 = subscriptionCost4to12 + residualBill;
+  const savings4to12 = billValue - totalCost4to12;
+
+  // Annual Totals
+  const totalSavingsAnnual = (savings1to3 * 3) + (savings4to12 * 9);
+
+  // For compatibility with UI that expects single values, we prioritize the "Immediate" (1-3) or average?
+  // We'll return the 1-3 values for "monthlySavings" to maximize impact, but UI should explicitly read the new fields.
+  const monthlySavings = savings1to3 > 0 ? savings1to3 : 0;
+  const annualSavings = totalSavingsAnnual > 0 ? totalSavingsAnnual : 0;
+
+  // Subscription Cost shown in generic UI -> average or immediate? Let's show immediate.
+  const subscriptionCost = subscriptionCost1to3;
+  const newTotalValue = totalCost1to3;
 
   const result: SimulationResult = {
     estimatedConsumptionKwh,
     minConsumptionKwh,
     compensableEnergyKwh,
     originalBillValue: billValue,
-    newTotalValue,
-    monthlySavings: monthlySavings > 0 ? monthlySavings : 0,
-    annualSavings: annualSavings > 0 ? annualSavings : 0,
+
+    newTotalValue, // Immediate (Mo 1-3)
+    subscriptionCost, // Immediate (Mo 1-3)
+    monthlySavings, // Immediate (Mo 1-3)
+    annualSavings,
+
     residualBill,
-    subscriptionCost,
     fioBTax,
+
+    // New Fields
+    savingsMonth1to3: savings1to3 > 0 ? savings1to3 : 0,
+    savingsMonth4to12: savings4to12 > 0 ? savings4to12 : 0,
+    discountAppliedMonth1to3: discount1to3,
+    discountAppliedMonth4to12: discount4to12,
+    monthlyCostMonth1to3: totalCost1to3,
+    monthlyCostMonth4to12: totalCost4to12,
+
     hasCompetitor: params.hasCompetitor,
     competitorTotalValue: 0,
     competitorSavings: 0,
@@ -90,23 +108,24 @@ export const calculateSavings = (params: SimulationParams): SimulationResult => 
   };
 
   if (params.hasCompetitor) {
-    // Competitor Logic:
-    // Even if discount is 0, we calculate the subscription cost.
     const discount = params.competitorDiscount || 0;
     const competitorDiscountDecimal = discount / 100;
 
-    // Subscription = (Gross - FioB) * (1 - CompetitorDiscount)
+    // Competitor usually has flat discount year round
     const competitorSubscriptionCost = (grossCompensableValue - fioBTax) * (1 - competitorDiscountDecimal);
-    const competitorTotalValue = competitorSubscriptionCost + residualBill;
+    const competitorTotal = competitorSubscriptionCost + residualBill;
+    const competitorMonthlySavings = billValue - competitorTotal;
 
-    const competitorMonthlySavings = billValue - competitorTotalValue;
-    const extraMonthlySavings = competitorTotalValue - newTotalValue;
+    // Extra Annual Savings: (My Annual Cost) vs (Competitor Annual Cost)
+    const myAnnualCost = (totalCost1to3 * 3) + (totalCost4to12 * 9);
+    const competitorAnnualCost = competitorTotal * 12;
+    const extraAnnualSavings = competitorAnnualCost - myAnnualCost;
 
     return {
       ...result,
-      competitorTotalValue,
+      competitorTotalValue: competitorTotal,
       competitorSavings: competitorMonthlySavings > 0 ? competitorMonthlySavings : 0,
-      extraSavings: extraMonthlySavings * 12 // Annual Extra Savings with i9
+      extraSavings: extraAnnualSavings > 0 ? extraAnnualSavings : 0
     };
   }
 

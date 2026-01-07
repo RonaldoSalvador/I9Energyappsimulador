@@ -10,6 +10,7 @@ export enum Distribuidora {
   ENERGISA_MT = 'Energisa Mato Grosso',
   ENERGISA_PB = 'Energisa Paraíba',
   ENERGISA_MS = 'Energisa Mato Grosso do Sul',
+  CEMIG = 'CEMIG Minas Gerais',
 }
 
 export interface LeadData {
@@ -50,11 +51,20 @@ export interface SimulationResult {
   compensableEnergyKwh: number;
   originalBillValue: number;
   newTotalValue: number;
-  monthlySavings: number;
+  monthlySavings: number; // Keep for backward compat, usually represents current/immediate
   annualSavings: number;
   residualBill: number; // What goes to Energisa
   subscriptionCost: number; // What goes to i9
   fioBTax: number;
+
+  // New Tiered System Fields
+  savingsMonth1to3: number;
+  savingsMonth4to12: number;
+  discountAppliedMonth1to3: number;
+  discountAppliedMonth4to12: number;
+  monthlyCostMonth1to3: number;
+  monthlyCostMonth4to12: number;
+
   // Competitor Comparison
   hasCompetitor?: boolean;
   competitorTotalValue?: number;

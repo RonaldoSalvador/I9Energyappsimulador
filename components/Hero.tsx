@@ -32,19 +32,19 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
 
           <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6">
             <span className="relative inline-block group cursor-default">
-              Economize
+              Seu Ano Novo com
             </span>
             {' '}
             <span className="relative inline-block text-energisa-orange group cursor-default">
-              até 30%
+              50% OFF
             </span>
             {' '}
             <span className="relative inline-block group cursor-default">
-              na sua conta de luz
+              na conta de luz
             </span>
           </h1>
           <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Garanta <span className="font-bold text-energisa-orange">desconto garantido</span> na sua fatura todos os meses. Sem obras, sem instalação e 100% digital.
+            Garanta <span className="font-bold text-energisa-orange">50% de desconto</span> nos primeiros 3 meses e economia garantida o ano todo. Sem obras e 100% digital.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
