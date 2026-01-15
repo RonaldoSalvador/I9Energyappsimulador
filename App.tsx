@@ -11,6 +11,7 @@ import { CookieConsent } from './components/CookieConsent';
 import { LegalModal, LegalContentType } from './components/LegalModal';
 import { Dashboard } from './components/Dashboard';
 import { AdminDashboard } from './components/AdminDashboard';
+import { PartnerDashboard } from './components/PartnerDashboard';
 import { ShieldCheck, Zap, LineChart } from 'lucide-react';
 import { supabase } from './services/supabase';
 import { Preloader } from './components/Preloader';
@@ -28,6 +29,8 @@ function App() {
    const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
    const [isLoggedIn, setIsLoggedIn] = useState(false); // Auth State
    const [isAdmin, setIsAdmin] = useState(false);
+   const [isPartner, setIsPartner] = useState(false);
+   const [userEmail, setUserEmail] = useState('');
    const [legalModalType, setLegalModalType] = useState<LegalContentType>(null);
 
    const scrollToSection = (sectionId: string) => {
@@ -50,11 +53,21 @@ function App() {
       return !!data;
    };
 
+   const checkIsPartner = async (email: string) => {
+      const { data } = await supabase.from('partners').select('id').eq('email', email).single();
+      return !!data;
+   };
+
    const handleUserAuth = async (user: any) => {
       setIsLoggedIn(true);
       if (user.email) {
+         setUserEmail(user.email);
          const isAdminUser = await checkIsAdmin(user.email);
          setIsAdmin(isAdminUser);
+         if (!isAdminUser) {
+            const isPartnerUser = await checkIsPartner(user.email);
+            setIsPartner(isPartnerUser);
+         }
       }
    };
 
@@ -87,7 +100,20 @@ function App() {
             await supabase.auth.signOut();
             setIsLoggedIn(false);
             setIsAdmin(false);
+            setIsPartner(false);
+            setUserEmail('');
          }} />;
+      } else if (isPartner) {
+         return <PartnerDashboard
+            partnerEmail={userEmail}
+            onLogout={async () => {
+               await supabase.auth.signOut();
+               setIsLoggedIn(false);
+               setIsAdmin(false);
+               setIsPartner(false);
+               setUserEmail('');
+            }}
+         />;
       } else {
          setIsLoggedIn(false);
          return null;

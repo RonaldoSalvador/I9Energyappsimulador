@@ -86,13 +86,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         }
     };
 
+    const generateReferralCode = (name: string) => {
+        const cleanName = name.trim().replace(/\s+/g, '').toLowerCase().substring(0, 6);
+        const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+        return `${cleanName}_${randomSuffix}`;
+    };
+
     const handlePartnerStatusUpdate = async (id: string, newStatus: string) => {
         try {
+            // Get partner data before updating
+            const partnerLead = partnerLeads.find(p => p.id === id);
+
             const { error } = await supabase
                 .from('partnership_leads')
                 .update({ status: newStatus, updated_at: new Date().toISOString() })
                 .eq('id', id);
             if (error) throw error;
+
+            // If approved, create partner in partners table
+            if (newStatus === 'approved' && partnerLead) {
+                const referralCode = generateReferralCode(partnerLead.name);
+
+                const { error: partnerError } = await supabase
+                    .from('partners')
+                    .insert([{
+                        name: partnerLead.name,
+                        email: partnerLead.email,
+                        phone: partnerLead.phone,
+                        referral_code: referralCode,
+                        status: 'active'
+                    }]);
+
+                if (partnerError) {
+                    console.error('Error creating partner:', partnerError);
+                    alert(`Parceiro aprovado, mas erro ao criar conta: ${partnerError.message}`);
+                } else {
+                    alert(`✅ Parceiro aprovado! Código de indicação: ${referralCode}`);
+                }
+            }
+
             setPartnerLeads(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p));
         } catch (error) {
             console.error('Error updating partner status:', error);
@@ -971,10 +1003,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${partner.status === 'approved'
-                                                                    ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                                                                    : partner.status === 'rejected'
-                                                                        ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                                                                        : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                                                                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                                                                : partner.status === 'rejected'
+                                                                    ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                                                                    : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
                                                                 }`}>
                                                                 {partner.status === 'approved' ? 'Aprovado' : partner.status === 'rejected' ? 'Rejeitado' : 'Pendente'}
                                                             </span>
