@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Send } from 'lucide-react';
+import { X, Send, AlertCircle } from 'lucide-react';
 import { Button } from './ui/Button';
+import { supabase } from '../services/supabase';
 
 interface PartnerModalProps {
     isOpen: boolean;
@@ -16,20 +17,40 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     if (!isOpen) return null;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        setError(null);
 
-        // Simulate API call or just log for now
-        setTimeout(() => {
-            console.log('Parceiro Lead:', formData);
+        try {
+            const { error: dbError } = await supabase
+                .from('partnership_leads')
+                .insert([{
+                    name: formData.name,
+                    email: formData.email,
+                    phone: formData.phone,
+                    company: formData.company || null,
+                    status: 'pending'
+                }]);
+
+            if (dbError) {
+                console.error('Error saving partner lead:', dbError);
+                setError('Não foi possível salvar. Tente novamente.');
+                setIsSubmitting(false);
+                return;
+            }
+
             setIsSubmitting(false);
             setSubmitted(true);
-            // Here you would typically send to Supabase 'leads' or 'partners' table
-        }, 1500);
+        } catch (err) {
+            console.error('Error:', err);
+            setError('Erro de conexão. Tente novamente.');
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -61,6 +82,12 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
 
                     {!submitted ? (
                         <form onSubmit={handleSubmit} className="space-y-4">
+                            {error && (
+                                <div className="flex items-center gap-2 text-red-400 bg-red-500/10 p-3 rounded-lg text-sm">
+                                    <AlertCircle size={16} />
+                                    {error}
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-1">Nome Completo</label>
                                 <input
