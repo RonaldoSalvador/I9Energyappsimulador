@@ -5,6 +5,7 @@ import { BUSINESS_CONFIG } from '../constants/businessConfig';
 
 interface HeroProps {
   onStart: () => void;
+  onPartnerClick?: () => void;
 }
 
 const ICONS = {
@@ -14,7 +15,7 @@ const ICONS = {
   Ban: Ban
 };
 
-export const Hero: React.FC<HeroProps> = ({ onStart }) => {
+export const Hero: React.FC<HeroProps> = ({ onStart, onPartnerClick }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = ['clientOffer', 'partnerOffer'] as const;
   const currentConfig = BUSINESS_CONFIG[slides[currentSlide]];
@@ -31,10 +32,11 @@ export const Hero: React.FC<HeroProps> = ({ onStart }) => {
     if (slides[currentSlide] === 'clientOffer') {
       onStart();
     } else {
-      // For now, Partner Offer also opens the simulation or could open a different modal later
-      // Using window.open or a specific handler would be better eventually
-      // For MVP visual:
-      onStart();
+      if (onPartnerClick) {
+        onPartnerClick();
+      } else {
+        onStart();
+      }
     }
   };
 
