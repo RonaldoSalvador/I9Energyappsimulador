@@ -17,16 +17,16 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onLoginClick }) => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-slate-900/80 backdrop-blur-xl border-b border-white/5">
-      <div className="container mx-auto px-4 h-28 flex items-center justify-between relative z-50 bg-inherit">
+      <div className="container mx-auto px-4 h-20 md:h-28 flex items-center justify-between relative z-50 bg-inherit">
         {/* Logo */}
         <div
-          className="flex items-center cursor-pointer group py-2"
+          className="flex items-center cursor-pointer group py-2 flex-shrink-0"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <img
-            src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/Gemini_Generated_Image_iogyo7iogyo7iogynova%20logo%20i9enrgy%20oficial%20(1)sem%20fundo.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL0dlbWluaV9HZW5lcmF0ZWRfSW1hZ2VfaW9neW83aW9neW83aW9neW5vdmEgbG9nbyBpOWVucmd5IG9maWNpYWwgKDEpc2VtIGZ1bmRvLnBuZyIsImlhdCI6MTc2NzM2Njc5NSwiZXhwIjoyMDgyNzI2Nzk1fQ.I92lFt8hmKcxZnv44Tqz9wQpU-DkCgDNeiphDNG-Zhs"
+            src="https://lqwywrknndolrxvmyuna.supabase.co/storage/v1/object/sign/arquivos%20da%20empresa/logo%20i9%20energy.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV85Y2EzZmYzMC1jYjNlLTRjZGUtOGM2MC0yYzA2ZGNlODM0ZTkiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhcnF1aXZvcyBkYSBlbXByZXNhL2xvZ28gaTkgZW5lcmd5LnBuZyIsImlhdCI6MTc2NzM2Njg0MiwiZXhwIjoyMDgyNzI2ODQyfQ.rHQ42TIUA6oeNIv-d0oc5Quwd6zc1EQHhPLy9nSyMiM"
             alt="i9 Energy Logo"
-            className="h-24 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+            className="h-12 md:h-20 w-auto object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]"
           />
         </div>
 
