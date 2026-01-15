@@ -80,7 +80,13 @@ export const Hero: React.FC<HeroProps> = ({ onStart, onPartnerClick }) => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-500">
-            <Button onClick={handleAction} className="text-lg px-10 py-5 min-w-[240px] shadow-2xl shadow-orange-500/20 transition-all hover:scale-105">
+            <Button
+              onClick={handleAction}
+              className={`text-lg px-10 py-5 min-w-[240px] shadow-2xl transition-all hover:scale-105 ${slides[currentSlide] === 'partnerOffer'
+                  ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20 ring-emerald-500'
+                  : 'shadow-orange-500/20'
+                }`}
+            >
               {currentConfig.buttonText}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>

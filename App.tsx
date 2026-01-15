@@ -9,7 +9,7 @@ import { Footer } from './components/Footer';
 import { LoginModal } from './components/LoginModal';
 import { CookieConsent } from './components/CookieConsent';
 import { LegalModal, LegalContentType } from './components/LegalModal';
-import { Dashboard } from './components/Dashboard'; // Import Dashboard
+import { Dashboard } from './components/Dashboard';
 import { AdminDashboard } from './components/AdminDashboard';
 import { ShieldCheck, Zap, LineChart } from 'lucide-react';
 import { supabase } from './services/supabase';
@@ -43,16 +43,55 @@ function App() {
          ref.current.scrollIntoView({ behavior: 'smooth' });
       }
    };
-   // ... (omitted methods checkIsAdmin, handleUserAuth, useEffect)
 
-   // ... (render logic) ...
+   const checkIsAdmin = async (email: string) => {
+      if (email.includes('@i9energy.com')) return true; // Legacy support + internal domain
+      const { data } = await supabase.from('admin_whitelist').select('id').eq('email', email).single();
+      return !!data;
+   };
 
-   // Modals
-   /* ... LoginModal Logic ... */
+   const handleUserAuth = async (user: any) => {
+      setIsLoggedIn(true);
+      if (user.email) {
+         const isAdminUser = await checkIsAdmin(user.email);
+         setIsAdmin(isAdminUser);
+      }
+   };
+
+   // SESSION RESTORATION & AUTH LISTENER
+   React.useEffect(() => {
+      // 1. Check active session on load
+      supabase.auth.getSession().then(({ data: { session } }) => {
+         if (session?.user) {
+            handleUserAuth(session.user);
+         }
+      });
+
+      // 2. Listen for auth changes (login, logout, refresh)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+         if (session?.user) {
+            handleUserAuth(session.user);
+         } else {
+            setIsLoggedIn(false);
+            setIsAdmin(false);
+         }
+      });
+
+      return () => subscription.unsubscribe();
+   }, []);
 
    // If Logged In, Render Dashboard
    if (isLoggedIn) {
-      // ... existing dashboard logic
+      if (isAdmin) {
+         return <AdminDashboard onLogout={async () => {
+            await supabase.auth.signOut();
+            setIsLoggedIn(false);
+            setIsAdmin(false);
+         }} />;
+      } else {
+         setIsLoggedIn(false);
+         return null;
+      }
    }
 
    return (
@@ -78,7 +117,73 @@ function App() {
                />
 
                {/* Simulator Section */}
-               {/* ... */}
+               <section ref={simulatorRef} id="simulator" className="py-16 relative scroll-mt-20">
+                  <div className="container mx-auto px-4">
+                     <div className="flex flex-col lg:flex-row gap-12 items-start">
+
+                        {/* Left Side: Value Props for Desktop */}
+                        <div className="hidden lg:block lg:w-1/3 pt-8">
+                           <h3 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-green-400">
+                              Por que escolher a i9 Energy?
+                           </h3>
+                           <div className="space-y-8">
+                              {/* Item 1: Security (Gold/Red) */}
+                              <div className="flex gap-4 group">
+                                 <div className="bg-red-900/30 p-3 rounded-xl h-fit border border-red-500/30 group-hover:bg-red-900/50 transition-colors">
+                                    <ShieldCheck className="text-red-400" size={24} />
+                                 </div>
+                                 <div>
+                                    <h4 className="font-bold text-lg text-white group-hover:text-red-300 transition-colors">Garantia Blindada</h4>
+                                    <p className="text-slate-400 leading-relaxed text-sm">Parceiro oficial (re)energisa. Segurança total para seu contrato.</p>
+                                 </div>
+                              </div>
+
+                              {/* Item 2: Clean Energy (Green/Trees) */}
+                              <div className="flex gap-4 group">
+                                 <div className="bg-green-900/30 p-3 rounded-xl h-fit border border-green-500/30 group-hover:bg-green-900/50 transition-colors">
+                                    <Zap className="text-green-400" size={24} />
+                                 </div>
+                                 <div>
+                                    <h4 className="font-bold text-lg text-white group-hover:text-green-300 transition-colors">100% Renovável</h4>
+                                    <p className="text-slate-400 leading-relaxed text-sm">Energia solar limpa. Ajude o planeta enquanto economiza.</p>
+                                 </div>
+                              </div>
+
+                              {/* Item 3: Economy (Gold/Star) */}
+                              <div className="flex gap-4 group">
+                                 <div className="bg-amber-900/30 p-3 rounded-xl h-fit border border-amber-500/30 group-hover:bg-amber-900/50 transition-colors">
+                                    <LineChart className="text-amber-400" size={24} />
+                                 </div>
+                                 <div>
+                                    <h4 className="font-bold text-lg text-white group-hover:text-amber-300 transition-colors">Economia Inteligente</h4>
+                                    <p className="text-slate-400 leading-relaxed text-sm">Algoritmo otimizado pela ANEEL. Pague menos, ganhe mais.</p>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* Right/Center: The Simulator */}
+                        <div className="w-full lg:w-2/3">
+                           <Simulator onOpenLegal={setLegalModalType} />
+                        </div>
+                     </div>
+                  </div>
+               </section>
+
+               {/* Content Sections */}
+               <div ref={howItWorksRef as React.RefObject<HTMLDivElement>}>
+                  <HowItWorks />
+               </div>
+
+               <div ref={testimonialsRef as React.RefObject<HTMLDivElement>}>
+                  <Testimonials />
+               </div>
+
+               <div ref={faqRef as React.RefObject<HTMLDivElement>}>
+                  <FAQ />
+               </div>
+
+               <Footer onOpenLegal={setLegalModalType} />
             </main>
 
             {/* Modals */}
@@ -86,7 +191,17 @@ function App() {
                isOpen={isLoginModalOpen}
                onClose={() => setIsLoginModalOpen(false)}
                onLoginSuccess={(user) => {
-                  /* ... existing login success logic ... */
+                  setIsLoggedIn(true);
+                  if (user && user.email) {
+                     checkIsAdmin(user.email).then(isAdminUser => {
+                        setIsAdmin(isAdminUser);
+                        if (isAdminUser) {
+                           console.log("Admin Access Granted");
+                        } else {
+                           console.warn("User logged in but is NOT an admin");
+                        }
+                     });
+                  }
                }}
             />
 
@@ -100,7 +215,6 @@ function App() {
                onClose={() => setLegalModalType(null)}
             />
 
-            {/* Compliance */}
             <CookieConsent />
          </div>
       </div>
