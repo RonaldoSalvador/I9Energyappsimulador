@@ -31,7 +31,7 @@ export const ELECTRIC_CONFIG = {
 
     // Motion smoothing for divider position
     easeStiffness: 6, // higher = faster easing
-    clipOffset: 25, // diagonal offset between top and bottom X in percent
+    clipOffset: 15, // reduced offset to move lightning "up" slightly or keep tight
 
     // Multi-frequency wave settings
     amps: [0.4, -0.8, 0.6],
@@ -456,11 +456,10 @@ export function LightningSplit({
                 />
             </svg>
 
-            {/* Shader Effects */}
-            <div className="absolute inset-0 z-20 pointer-events-none opacity-50 mix-blend-screen">
-                {/* This would be the shader canvas, we keep it subtle or remove if too heavy */}
+            {/* Shader Effects - DISABLED FOR PERFORMANCE */}
+            {/* <div className="absolute inset-0 z-20 pointer-events-none opacity-50 mix-blend-screen">
                 <ShaderCanvas className="w-full h-full" />
-            </div>
+            </div> */}
 
         </motion.div>
     )

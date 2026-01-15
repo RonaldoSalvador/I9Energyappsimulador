@@ -3,7 +3,7 @@ import { PhaseType, Distribuidora, SimulationParams, SimulationResult, LeadData 
 import { calculateSavings } from '../services/energyCalculator';
 import { Button } from './ui/Button';
 import { ArrowLeft, Check, Loader2, UploadCloud, FileText, X, AlertCircle, Zap, Coins, Calculator, CheckCircle2, Banknote } from 'lucide-react';
-import { LocationMap } from './ui/expand-map';
+// import { LocationMap } from './ui/expand-map'; // Removed unused import
 import { Results } from './Results';
 import { SuccessStep } from './SuccessStep';
 import { LegalContentType } from './LegalModal';
