@@ -28,3 +28,9 @@ CREATE INDEX idx_partnership_leads_email ON partnership_leads(email);
 
 -- Índice para busca por status
 CREATE INDEX idx_partnership_leads_status ON partnership_leads(status);
+
+-- Política para atualização por usuários autenticados (admins)
+CREATE POLICY "Authenticated users can update" ON partnership_leads
+    FOR UPDATE TO authenticated
+    USING (true)
+    WITH CHECK (true);
