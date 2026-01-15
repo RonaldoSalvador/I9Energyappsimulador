@@ -55,7 +55,7 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
                     <div className="text-center mb-8">
                         <h2 className="text-2xl font-bold text-white mb-2">Seja um Parceiro i9</h2>
                         <p className="text-slate-400">
-                            Indique clientes, acompanhe o status e ganhe comissões recorrentes.
+                            Indique clientes, acompanhe o status e ganhe bônus por cada contrato fechado.
                         </p>
                     </div>
 

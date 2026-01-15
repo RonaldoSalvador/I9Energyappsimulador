@@ -33,14 +33,14 @@ export const BUSINESS_CONFIG = {
     },
     partnerOffer: {
         titlePrefix: "Indique clientes e",
-        highlight: "Ganhe Recorrência",
-        titleSuffix: "todo mês",
-        descriptionPrefix: "Transforme sua rede de contatos em uma fonte de renda passiva.",
-        description: "O seu cliente economiza e você ganha comissão mensal.",
-        descriptionHighlight: "Renda Extra",
+        highlight: "Ganhe Bônus",
+        titleSuffix: "por indicação",
+        descriptionPrefix: "Transforme sua rede de contatos em renda extra.",
+        description: "Cada cliente que fechar contrato, você ganha um bônus.",
+        descriptionHighlight: "Ganhe por Indicação",
         buttonText: "Quero ser Parceiro",
         badges: [
-            { text: "Comissão Mensal", iconName: "DollarSign" },
+            { text: "Bônus por Cliente", iconName: "DollarSign" },
             { text: "Painel Exclusivo", iconName: "LayoutDashboard" },
             { text: "Zero Investimento", iconName: "Ban" }
         ] as BadgeConfig[]
