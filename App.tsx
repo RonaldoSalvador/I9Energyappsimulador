@@ -50,13 +50,13 @@ function App() {
 
    const checkIsAdmin = async (email: string) => {
       if (email.includes('@i9energy.com')) return true; // Legacy support + internal domain
-      const { data } = await supabase.from('admin_whitelist').select('id').eq('email', email).single();
+      const { data } = await supabase.from('admin_whitelist').select('id').eq('email', email).maybeSingle();
       return !!data;
    };
 
    const checkIsPartner = async (email: string) => {
       console.log('🔍 Checking if partner:', email);
-      const { data, error } = await supabase.from('partners').select('id').eq('email', email).single();
+      const { data, error } = await supabase.from('partners').select('id').eq('email', email).maybeSingle();
       console.log('🔍 Partner check result:', { data, error });
       return !!data;
    };
