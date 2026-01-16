@@ -31,6 +31,7 @@ function App() {
    const [isAdmin, setIsAdmin] = useState(false);
    const [isPartner, setIsPartner] = useState(false);
    const [userEmail, setUserEmail] = useState('');
+   const [authChecking, setAuthChecking] = useState(false); // Prevent race condition
    const [legalModalType, setLegalModalType] = useState<LegalContentType>(null);
 
    const scrollToSection = (sectionId: string) => {
@@ -59,16 +60,26 @@ function App() {
    };
 
    const handleUserAuth = async (user: any) => {
-      setIsLoggedIn(true);
+      setAuthChecking(true);
       if (user.email) {
          setUserEmail(user.email);
          const isAdminUser = await checkIsAdmin(user.email);
          setIsAdmin(isAdminUser);
+
          if (!isAdminUser) {
             const isPartnerUser = await checkIsPartner(user.email);
             setIsPartner(isPartnerUser);
+
+            // If not admin and not partner, user is not authorized
+            if (!isPartnerUser) {
+               setAuthChecking(false);
+               setIsLoggedIn(false);
+               return;
+            }
          }
       }
+      setAuthChecking(false);
+      setIsLoggedIn(true);
    };
 
    // SESSION RESTORATION & AUTH LISTENER
@@ -87,11 +98,24 @@ function App() {
          } else {
             setIsLoggedIn(false);
             setIsAdmin(false);
+            setIsPartner(false);
          }
       });
 
       return () => subscription.unsubscribe();
    }, []);
+
+   // Show loading while checking auth
+   if (authChecking) {
+      return (
+         <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+            <div className="text-center">
+               <div className="w-12 h-12 border-4 border-energisa-orange border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+               <p className="text-slate-400">Verificando acesso...</p>
+            </div>
+         </div>
+      );
+   }
 
    // If Logged In, Render Dashboard
    if (isLoggedIn) {
@@ -114,9 +138,6 @@ function App() {
                setUserEmail('');
             }}
          />;
-      } else {
-         setIsLoggedIn(false);
-         return null;
       }
    }
 
