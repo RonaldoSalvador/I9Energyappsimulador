@@ -55,29 +55,36 @@ function App() {
    };
 
    const checkIsPartner = async (email: string) => {
-      const { data } = await supabase.from('partners').select('id').eq('email', email).single();
+      console.log('🔍 Checking if partner:', email);
+      const { data, error } = await supabase.from('partners').select('id').eq('email', email).single();
+      console.log('🔍 Partner check result:', { data, error });
       return !!data;
    };
 
    const handleUserAuth = async (user: any) => {
+      console.log('🔐 handleUserAuth called for:', user.email);
       setAuthChecking(true);
       if (user.email) {
          setUserEmail(user.email);
          const isAdminUser = await checkIsAdmin(user.email);
+         console.log('🔐 Is Admin:', isAdminUser);
          setIsAdmin(isAdminUser);
 
          if (!isAdminUser) {
             const isPartnerUser = await checkIsPartner(user.email);
+            console.log('🔐 Is Partner:', isPartnerUser);
             setIsPartner(isPartnerUser);
 
             // If not admin and not partner, user is not authorized
             if (!isPartnerUser) {
+               console.log('❌ User not authorized, logging out');
                setAuthChecking(false);
                setIsLoggedIn(false);
                return;
             }
          }
       }
+      console.log('✅ User authorized, setting logged in');
       setAuthChecking(false);
       setIsLoggedIn(true);
    };
