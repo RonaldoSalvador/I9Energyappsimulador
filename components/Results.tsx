@@ -160,8 +160,16 @@ export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) 
           <p className="text-slate-400 text-sm">Veja como podemos transformar sua conta de luz</p>
         </div>
 
-        {/* ALWAYS SHOW LIGHTNING SPLIT (Comparison Mode) */}
-        <div className="h-[500px] relative">
+        {/* MOBILE: Stacked layout (no clipping issues) */}
+        <div className="md:hidden">
+          <div className="border-b border-white/5">
+            <CompetitorSide result={result} />
+          </div>
+          <I9Side result={result} />
+        </div>
+
+        {/* DESKTOP: Lightning Split with hover interaction */}
+        <div className="hidden md:block h-[500px] relative">
           <LightningSplit
             className="h-full"
             leftComponent={<CompetitorSide result={result} />}
@@ -169,7 +177,7 @@ export const Results: React.FC<ResultsProps> = ({ result, onReset, onProceed }) 
           />
 
           {/* Floating Label Instructions */}
-          <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 text-center pointer-events-none z-40">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-center pointer-events-none z-40">
             <p className="text-xs text-white/50 bg-black/30 px-3 py-1 rounded-full backdrop-blur-sm">
               Passe o mouse para comparar
             </p>
