@@ -49,16 +49,17 @@ function App() {
    };
 
    const checkIsAdmin = async (email: string) => {
-      if (email.includes('@i9energy.com')) return true; // Legacy support + internal domain
-      const { data } = await supabase.from('admin_whitelist').select('id').eq('email', email).maybeSingle();
-      return !!data;
+      if (email.includes('@i9energy.com')) return true;
+      const { data, error } = await supabase.from('admin_whitelist').select('id').eq('email', email).limit(1);
+      console.log('🔐 Admin check:', { email, data, error });
+      return data && data.length > 0;
    };
 
    const checkIsPartner = async (email: string) => {
       console.log('🔍 Checking if partner:', email);
-      const { data, error } = await supabase.from('partners').select('id').eq('email', email).maybeSingle();
+      const { data, error } = await supabase.from('partners').select('id').eq('email', email).limit(1);
       console.log('🔍 Partner check result:', { data, error });
-      return !!data;
+      return data && data.length > 0;
    };
 
    const handleUserAuth = async (user: any) => {
