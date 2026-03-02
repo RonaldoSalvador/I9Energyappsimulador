@@ -54,42 +54,40 @@ const CompetitorSide = ({ result }: { result: SimulationResult }) => {
 
 const I9Side = ({ result }: { result: SimulationResult }) => {
   return (
-    <div className="h-full w-full bg-emerald-900 flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden group">
-      {/* Premium Background Effects */}
+    <div className="w-full bg-slate-900 flex flex-col items-center justify-center p-5 sm:p-6 relative overflow-hidden">
+      {/* Premium Background - gradient only, no external SVG */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/40 via-slate-900 to-slate-900"></div>
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
 
-      <div className="relative z-10 w-full max-w-sm space-y-3 sm:space-y-4">
+      <div className="relative z-10 w-full max-w-sm space-y-4">
 
         {/* Card 1: Immediate Savings (Months 1-3) */}
-        <div className="bg-energisa-orange/10 border border-energisa-orange/30 p-3 sm:p-4 rounded-2xl relative shadow-lg shadow-orange-500/10 backdrop-blur-sm">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-energisa-orange/20 blur-2xl rounded-full"></div>
+        <div className="bg-energisa-orange/10 border border-energisa-orange/30 p-4 rounded-2xl relative overflow-hidden shadow-lg shadow-orange-500/10">
+          {/* Decorative glow - hidden on mobile to prevent overlap */}
+          <div className="hidden sm:block absolute -top-10 -right-10 w-24 h-24 bg-energisa-orange/20 blur-2xl rounded-full"></div>
 
           {/* Title */}
-          <p className="text-orange-200 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-1">
+          <p className="relative z-10 text-orange-200 text-xs font-bold uppercase tracking-widest mb-2 flex items-center gap-1">
             <Zap size={12} className="fill-orange-400 text-orange-400 flex-shrink-0" />
             Economia 1º Trimestre
           </p>
 
           {/* Discount badge */}
-          <div className="inline-flex items-center bg-orange-500/20 border border-orange-400/30 rounded-full px-2 py-0.5 mb-2">
-            <span className="text-orange-200 text-[10px] sm:text-[11px] font-semibold whitespace-nowrap">Desconto de 50% aplicado</span>
+          <div className="relative z-10 inline-flex items-center bg-orange-500/20 border border-orange-400/30 rounded-full px-2.5 py-0.5 mb-3">
+            <span className="text-orange-200 text-[11px] font-semibold">Desconto de 50% aplicado</span>
           </div>
 
           {/* Values row */}
-          <div className="flex items-end justify-between gap-2">
-            <div className="min-w-0">
-              <div className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-baseline gap-0.5">
-                <span className="whitespace-nowrap">
-                  R$ <CountUp end={result.savingsMonth1to3} decimals={2} duration={2} separator="." decimal="," />
-                </span>
-                <span className="text-[10px] sm:text-xs font-normal text-orange-200/50">/mês</span>
+          <div className="relative z-10 flex items-end justify-between gap-3">
+            <div>
+              <div className="text-2xl font-black text-white tracking-tight flex items-baseline gap-1">
+                R$ <CountUp end={result.savingsMonth1to3} decimals={2} duration={2} separator="." decimal="," />
+                <span className="text-xs font-normal text-orange-200/50">/mês</span>
               </div>
-              <p className="text-[10px] text-orange-200/40 mt-0.5">de economia</p>
+              <p className="text-[11px] text-orange-200/50 mt-0.5">de economia</p>
             </div>
             <div className="text-right flex-shrink-0">
-              <p className="text-[10px] sm:text-[11px] text-orange-200/60 mb-0.5">Você paga só</p>
-              <p className="text-base sm:text-lg font-bold text-white whitespace-nowrap">
+              <p className="text-[11px] text-orange-200/60 mb-0.5">Você paga só</p>
+              <p className="text-lg font-bold text-white whitespace-nowrap">
                 R$ {result.monthlyCostMonth1to3.toFixed(2)}
               </p>
             </div>
@@ -97,14 +95,15 @@ const I9Side = ({ result }: { result: SimulationResult }) => {
         </div>
 
         {/* Card 2: Annual Savings */}
-        <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 sm:p-4 rounded-2xl relative shadow-lg backdrop-blur-sm">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full -mr-10 -mt-10"></div>
+        <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl relative overflow-hidden shadow-lg">
+          {/* Decorative glow - hidden on mobile */}
+          <div className="hidden sm:block absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full -mr-10 -mt-10"></div>
 
-          <p className="text-emerald-200 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-2">Economia Total Anual</p>
+          <p className="relative z-10 text-emerald-200 text-xs font-bold uppercase tracking-widest mb-2">Economia Total Anual</p>
 
-          <div className="flex items-center gap-2 text-white mb-2">
+          <div className="relative z-10 flex items-center gap-2 text-white mb-2">
             <Trophy size={18} className="text-yellow-400 fill-yellow-400/20 flex-shrink-0" />
-            <span className="text-2xl sm:text-3xl font-black tracking-tight whitespace-nowrap">
+            <span className="text-3xl font-black tracking-tight">
               R$ <CountUp end={result.annualSavings} decimals={2} duration={2.5} separator="." decimal="," />
             </span>
           </div>
@@ -112,14 +111,14 @@ const I9Side = ({ result }: { result: SimulationResult }) => {
           <div className="w-full h-px bg-emerald-500/20 my-2"></div>
 
           {/* Impact Row */}
-          <div className="flex justify-between w-full px-1 gap-2">
+          <div className="relative z-10 flex justify-between w-full px-1 gap-2">
             <div className="flex items-center gap-1.5">
               <div className="p-1 bg-emerald-500/20 rounded-full"><Sparkles size={10} className="text-emerald-300" /></div>
-              <span className="text-[10px] text-emerald-100/80 font-medium">Bônus de Verão</span>
+              <span className="text-[11px] text-emerald-100/80 font-medium">Bônus de Verão</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="p-1 bg-emerald-500/20 rounded-full"><ShieldCheck size={10} className="text-emerald-300" /></div>
-              <span className="text-[10px] text-emerald-100/80 font-medium">Garantia em Contrato</span>
+              <span className="text-[11px] text-emerald-100/80 font-medium">Garantia em Contrato</span>
             </div>
           </div>
         </div>
